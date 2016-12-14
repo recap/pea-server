@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<title>W3.CSS</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="/js/jquery-1.7.1.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/js/delivery.js"></script>
+<link rel="stylesheet" href="http://www.w3schools.com/lib/w3.css">
+<body>
+
+<div class="w3-container w3-green">
+  <h1>Pea Server</h1> 
+  <p>A short-lived personal web server.</p> 
+</div>
+
+<div class="w3-row-padding">
+  <div class="w3-third">
+  <h2>pea site name</h2>
+  <p><input id="id" class="w3-input"></input></p>
+  </div>
+
+  <div class="w3-third">
+    <p><input id="files" multiple type="file" class="w3-btn w3-padding-large w3-white w3-border w3-hover-border-black"></input></p>
+    <p><button id="start" class="w3-btn w3-padding-large w3-white w3-border w3-hover-border-black"><b>START PEA SERVER</b></button></p>
+  </div>
+
+  <div class="w3-third">
+  <p></p>
+  <div id="log" class="w3-container w3-black">
+	</div>
+  </div>
+</div>
+
+</body>
+<script>
+
+function weblog(message, type){
+	if(type == undefined){
+		type = "info";
+	}
+    $('#log').append('<p>['+type+'] ' + message + '</p>');
+ 
+}
+var user_id = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5);
+$('#id').val(user_id);
+weblog("test");
+
+
+
+</script>
+<script>
+	var file_hash = {};
+	var server_url = "http://"+location.host;
+	
+
+	function handleFileSelect(evt) {
+	    var files = evt.target.files; // FileList object
+
+	    // files is a FileList of File objects. List some properties.
+	    var output = [];
+	    for (var i = 0, f; f = files[i]; i++) {
+		
+		//output.push('<li><strong>', escape(f.name), '</strong> (', f.type || 'n/a', ') - ',
+		//	  f.size, ' bytes, last modified: ',
+		//	  f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a',
+		//	  '</li>');
+		file_hash[escape(f.name)] = f;
+		weblog("added: "+escape(f.name));
+	    }
+	  }
+
+	function startServer(evt){
+		console.log("s0");
+		weblog("starting server...");
+		var socket = io.connect(server_url);
+		weblog("server started.");
+		var user_id = $('#id').val();
+		console.log("s1");
+		var cnt = 0;
+		var delivery = new Delivery(socket);
+		delivery.on('delivery.connect', function(delivery){
+			console.log("connected");
+		});
+		delivery.on('send.success', function(fileUID){
+			console.log("file was sent ok.");
+			weblog("file sent OK: "+fileUID.name);
+		});
+
+		socket.on("file-request", function(data){
+			console.log("rec: "+data);
+            weblog("requesting file: "+data);
+			var filename = data;
+			if(filename in file_hash){
+				var f = file_hash[filename];
+				delivery.send(f);
+			}
+		});
+		
+		socket.emit("hand-shake", { user: user_id });
+	}
+
+	document.getElementById('files').addEventListener('change', handleFileSelect, false);
+	document.getElementById('start').addEventListener('click', startServer, false);
+</script>
+</html>
+
