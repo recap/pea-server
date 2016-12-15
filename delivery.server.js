@@ -1,3 +1,5 @@
+//from: https://github.com/liamks/Delivery.js
+
 var uuid    = require('uuid'),
     mime    = require('mime'),
     fs      = require('fs');
