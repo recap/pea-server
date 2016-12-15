@@ -41,8 +41,8 @@ function weblog(message, type){
     $('#log').append('<p>['+type+'] ' + message + '</p>');
  
 }
-//var user_id = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5);
-var user_id = "tester";
+var user_id = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5);
+//var user_id = "tester";
 $('#id').val(user_id);
 weblog("test");
 
