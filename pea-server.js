@@ -64,13 +64,30 @@ function handleUserSite(req, res){
 				res.end();
 			});
 
+			socket.once('file-list-reply', function(data){
+				console.log(JSON.stringify(data));
+				var html_str = "<html><title>Directory listing for "+user+"</title>";
+				html_str += "<body><h2>Directory listing for "+user+"</h2><hr>";
+				html_str += "<ul>";
+				data.forEach(function(item) {
+					html_str += "<li><a href="+item+">"+item+"</a>";
+				});
+				html_str += "</ul><hr></body></html>";
+
+				res.writeHead(200);
+				res.write(html_str);
+				res.end();
+			});
+
 			var file_name = path.basename(url_pathname);
 			console.log("requesting filename: "+file_name);
 			if((file_name == "") | (file_name == user)){
-				file_name = "index.html"
+				//file_name = "index.html"
+				socket.emit("file-list-request", null);
+			}else{
+				finished_files[file_name] = false;
+				socket.emit("file-request", file_name);
 			}
-			finished_files[file_name] = false;
-			socket.emit("file-request", file_name);
 		}else{
 			console.log("404");
 			res.writeHead(404);

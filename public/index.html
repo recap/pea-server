@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-<title>W3.CSS</title>
+<title>Pea Server</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="/js/jquery-1.7.1.min.js"></script>
 <script src="/socket.io/socket.io.js"></script>
@@ -41,7 +41,8 @@ function weblog(message, type){
     $('#log').append('<p>['+type+'] ' + message + '</p>');
  
 }
-var user_id = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5);
+//var user_id = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5);
+var user_id = "tester";
 $('#id').val(user_id);
 weblog("test");
 
@@ -88,12 +89,19 @@ weblog("test");
 
 		socket.on("file-request", function(data){
 			console.log("rec: "+data);
-            weblog("requesting file: "+data);
+            		weblog("requesting file: "+data);
 			var filename = data;
 			if(filename in file_hash){
 				var f = file_hash[filename];
 				delivery.send(f);
 			}
+		});
+		socket.on('file-list-request', function(data){
+			var file_array = [];
+			Object.keys(file_hash).forEach(function(key){
+				file_array.push(key);
+			});
+			socket.emit('file-list-reply', file_array);
 		});
 		
 		socket.emit("hand-shake", { user: user_id });
