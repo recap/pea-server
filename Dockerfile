@@ -3,11 +3,11 @@ FROM google/nodejs
 MAINTAINER Reggie Cushing
 
 RUN mkdir /app/public 
-RUN mkdir /app/Delivery.js
+
 
 ADD pea-server.js /app/
+ADD delivery.server.js /app/
 ADD public /app/public/
-ADD Delivery.js /app/Delivery.js/
 
 RUN npm install http
 RUN npm install url
