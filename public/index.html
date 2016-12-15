@@ -3,9 +3,28 @@
 <title>Pea Server</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="/js/jquery-1.7.1.min.js"></script>
+<script src="/js/jquery.qrcode.min.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script src="/js/delivery.js"></script>
 <link rel="stylesheet" href="http://www.w3schools.com/lib/w3.css">
+<style>
+.file-upload {
+    position: relative;
+    overflow: hidden;
+    margin: 10px;
+}
+.file-upload input.upload {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 0;
+    padding: 0;
+    font-size: 20px;
+    cursor: pointer;
+    opacity: 0;
+    filter: alpha(opacity=0);
+}
+</style>
 <body>
 
 <div class="w3-container w3-green">
@@ -13,18 +32,24 @@
   <p>A short-lived personal web server.</p> 
 </div>
 
-<div class="w3-row-padding">
-  <div class="w3-third">
+<!--<div class="w3-col-padding">-->
+  <div class="w3-container">
   <h2>pea site name</h2>
   <p><input id="id" class="w3-input"></input></p>
+  <div id="qrcode"></div>
+  <div id="url"></div>
   </div>
 
-  <div class="w3-third">
-    <p><input id="files" multiple type="file" class="w3-btn w3-padding-large w3-white w3-border w3-hover-border-black"></input></p>
-    <p><button id="start" class="w3-btn w3-padding-large w3-white w3-border w3-hover-border-black"><b>START PEA SERVER</b></button></p>
+  <div id="div2" class="w3-container">
+    <div  class="file-upload w3-btn w3-padding-large w3-white w3-border w3-hover-border-black">
+	<span><b>CHOOSE FILES</b></span>
+	<input  id="files" type="file" class="upload" />
+	</div>
+    <button id="start" class="w3-btn w3-padding-large w3-white w3-border w3-hover-border-black"><b>START PEA SERVER</b></button>
+    <button id="btn_log" class="w3-btn w3-padding-large w3-white w3-border w3-hover-border-black"><b>SHOW LOG</b></button>
   </div>
 
-  <div class="w3-third">
+  <div class="w3-container">
   <p></p>
   <div id="log" class="w3-container w3-black">
 	</div>
@@ -41,10 +66,12 @@ function weblog(message, type){
     $('#log').append('<p>['+type+'] ' + message + '</p>');
  
 }
+
 var user_id = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5);
 //var user_id = "tester";
 $('#id').val(user_id);
-weblog("test");
+$('#log').hide();
+weblog("started log.");
 
 
 
@@ -71,6 +98,7 @@ weblog("test");
 	  }
 
 	function startServer(evt){
+		$("#id").prop('disabled', true);
 		console.log("s0");
 		weblog("starting server...");
 		var socket = io.connect(server_url);
@@ -105,10 +133,15 @@ weblog("test");
 		});
 		
 		socket.emit("hand-shake", { user: user_id });
+		$('#div2').hide();	
+		var url_str = server_url+"/"+user_id+"/";
+		$('#qrcode').qrcode(url_str);
+		document.getElementById('url').innerHTML = "<p>"+url_str+"</p>";
 	}
 
 	document.getElementById('files').addEventListener('change', handleFileSelect, false);
 	document.getElementById('start').addEventListener('click', startServer, false);
+	document.getElementById('btn_log').addEventListener('click', function(){$('#log').show();}, false);
 </script>
 </html>
 
