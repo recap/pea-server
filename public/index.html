@@ -108,7 +108,7 @@ weblog("started log.");
 		var cnt = 0;
 		var delivery = new Delivery(socket);
 		delivery.on('delivery.connect', function(delivery){
-			console.log("connected");
+			//console.log("connected");
 		});
 		delivery.on('send.success', function(fileUID){
 			console.log("file was sent ok.");
@@ -131,12 +131,15 @@ weblog("started log.");
 			});
 			socket.emit('file-list-reply', file_array);
 		});
+		socket.on('hand-shake-ack', function(){
+			weblog("connected to: "+server_url);
+			$('#div2').hide();	
+			var url_str = server_url+"/"+user_id+"/";
+			$('#qrcode').qrcode(url_str);
+			document.getElementById('url').innerHTML = "<a target=_blank href="+url_str+">"+url_str+"</a>";
+		});
 		
 		socket.emit("hand-shake", { user: user_id });
-		$('#div2').hide();	
-		var url_str = server_url+"/"+user_id+"/";
-		$('#qrcode').qrcode(url_str);
-		document.getElementById('url').innerHTML = "<p>"+url_str+"</p>";
 	}
 
 	document.getElementById('files').addEventListener('change', handleFileSelect, false);

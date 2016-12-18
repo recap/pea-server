@@ -28,13 +28,6 @@ var httpPort = 80;
 
 
 
-ev.on('file-receive', function(data) {
-
-	console.log("ev1: "+data.user)
-
-});
-
-
 
 
 function handleUserSite(req, res){
@@ -48,12 +41,12 @@ function handleUserSite(req, res){
 	//console.log(user);
 	var finished_files={};
 	res.on('error', function(evt){
-		console.log("error: "+evt);
+		console.log(evt);
 	});
 	if(user != null){
 		user = user[1];
 		if(user in users){
-			console.log("found user: "+user);
+			//console.log("found user: "+user);
 			var socket = users[user].socket;
 		
 			var delivery = 	users[user].delivery;
@@ -65,7 +58,7 @@ function handleUserSite(req, res){
 			});
 
 			socket.once('file-list-reply', function(data){
-				console.log(JSON.stringify(data));
+				//console.log(JSON.stringify(data));
 				var html_str = "<html><title>Directory listing for "+user+"</title>";
 				html_str += "<body><h2>Directory listing for "+user+"</h2><hr>";
 				html_str += "<ul>";
@@ -80,16 +73,16 @@ function handleUserSite(req, res){
 			});
 
 			var file_name = path.basename(url_pathname);
-			console.log("requesting filename: "+file_name);
 			if((file_name == "") | (file_name == user)){
-				//file_name = "index.html"
+				user_log(user, "requesting filelist.");
 				socket.emit("file-list-request", null);
 			}else{
+				user_log(user, "requesting filename: "+file_name);
 				finished_files[file_name] = false;
 				socket.emit("file-request", file_name);
 			}
 		}else{
-			console.log("404");
+			//console.log("404");
 			res.writeHead(404);
 			res.end("404");
 		}
@@ -98,10 +91,17 @@ function handleUserSite(req, res){
 	
 }
 
+var user_log = function(user, message){
+		if(user == undefined){
+			user = "nouser";
+		}
+		console.log("["+user+"] "+message);
+	};
+
 var server = http.createServer(function(req, res) {
 	var uri = url.parse(req.url).pathname;
     	var filename = path.join(process.cwd(), "public", uri);
-	console.log(filename);
+	//console.log(filename);
 	fs.stat(filename, function(err, stat){
 		if(err == null){
 			//console.log("exists");
@@ -130,116 +130,11 @@ io.on('connection', function(socket){
 		//console.log("hs1: "+data["user"]);
 		var user = data["user"];
 		if(user != null){
-			console.log("Added user: "+user);
+			console.log("added user: "+user);
 			var delivery = 	dl.listen(socket);
 			users[user] = { socket: socket, delivery : delivery };
+			socket.emit('hand-shake-ack', null);
 		}
-		//ev.emit("file-receive", data);
 	});
-	//socket.on('hand-shake2', function(data){
-	//	console.log("hs2: "+data);
-	//});
 });
-
-/*io.sockets.on('connection', function(socket){
-  var delivery = dl.listen(socket);
-  delivery.on('receive.success',function(file){
-
-    fs.writeFile(file.name,file.buffer, function(err){
-      if(err){
-        console.log('File could not be saved.');
-      }else{
-        console.log('File saved.');
-      };
-    });
-  });
-});*/
-
-//////////////////////////////////////////////////////////////////
-
-var serve2 = http.createServer(function(request, response) {
-	
-	var query = qs.parse(url.parse(request.url).query);
-	var url_parts = url.parse(request.url);
-	var url_file = url_parts["pathname"].slice(1);
-	var servd = false;
-	console.log(url_file);
-	console.log(request.headers.referer);
-	var url_ref = request.headers.referer;
-	response.on('error', function(err){
-		console.log(err);
-	});
-        
-	if(url_ref != undefined){
-		var query_ref = qs.parse(url.parse(url_ref).query);
-		query = query_ref	
-	}
-	if(query["user"]){
-		var user = query["user"];
-		
-		console.log(user)
-		if(user in users){
-			servd = true;
-			console.log("found user "+user)
-			var conn = users[user];
-			conn.on('message', function(message) {
-				//console.log("Message..."+message);
-				//if (message.type === 'utf8') { // accept only text
-					//var jdata = JSON.parse(htmlEntities(message.utf8Data));
-					var jdata = JSON.parse(message.utf8Data);
-					//console.log("Message2: "+message.utf8Data);
-					if(url_ref != undefined){
-						var payload64 = jdata["data"].replace(/^data:image\/png;base64,|^data:image\/jpeg;base64,|^data:image\/jpg;base64,|^data:image\/bmp;base64,/, '');
-						var buf = new Buffer(payload64, 'base64');
-						response.writeHead(200, {
-							'Content-length': buf.length,
-							'Content-Type': 'Image/jpeg'});
-						console.log("Writing....1");	
-						//var ret = response.write(jdata["data"], 'utf-8');
-						var ret = response.write(buf);
-						console.log("Writing....2" + ret);	
-						//response.end(request.method);
-						console.log("Ending....1");	
-						response.end(function(evt){ console.log("Ended");});
-					}else{
-						response.writeHead(200);
-						console.log("Writing....1");	
-						var ret = response.write(jdata["data"], 'utf-8');
-						console.log("Writing....2" + ret);	
-						//response.end(request.method);
-						console.log("Ending....1");	
-						response.end(function(evt){ console.log("Ended");});
-					}
-					
-					
-
-				  //  }
-			    });
-			if(url_file == "frontend.html"){
-				var json = JSON.stringify({ type:'message', data: "index.html" });
-			}else{
-				var json = JSON.stringify({ type:'message', data: url_file });
-			}
-			conn.sendUTF(json);
-			
-		}
-		//serve browser page
-		//conn = users[query["user"]]
-		//var json = JSON.stringify({ type:'message', data: "test.html" });
-		//connection.sendUTF(json);
-		
-	}
-
-
-	if((url_file == "frontend.html") && (servd == false)){	
-		//serve server page
-		var done = finalhandler(request, response);
-		serve(request,response, done);
-		console.log("wewewewewewe");
-	}else{
-
-		
-	}
-});
-
 

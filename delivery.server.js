@@ -148,7 +148,6 @@ Delivery.prototype.subscribe = function() {
   this.socket.on('receive.start', function(file) {
     //_this.pubSub.publish('receive.start', file.uid);
     _this.evEm.emit('receive.start', file.uid);
-	console.log("3333");
     //var filePackage = new FilePackage(file, _this.pubSub, true);
     var filePackage = new FilePackage(file, _this.evEm, true);
     _this.receiving[file.uid] = filePackage;
@@ -158,7 +157,6 @@ Delivery.prototype.subscribe = function() {
   this.evEm.on('file.load',function(filePackage){
     //_this.pubSub.publish('send.start',filePackage);
     _this.evEm.emit('send.start',filePackage);
-	console.log("4444");
 	_this.socket.emit('send.start',filePackage.batch);
     //_this.socket.emit('receive.start',filePackage.batch);
   });
@@ -175,7 +173,6 @@ Delivery.prototype.subscribe = function() {
     //receive.start
     //_this.pubSub.publish('receive.start',filePackage);
     _this.evEm.emit('receive.start',filePackage);
-	console.log("11111");
 	//console.log(JSON.stringify(filePackage));
     //var fp = new FilePackage(filePackage, _this.pubSub, true);
     var fp = new FilePackage(filePackage, _this.evEm, true);
@@ -192,12 +189,12 @@ Delivery.prototype.subscribe = function() {
 };
 
 Delivery.prototype.on = function(evt,fn) {
-  console.log("subscription to: "+evt);
+  //console.log("subscription to: "+evt);
   //this.pubSub.subscribe(evt,fn);
   this.evEm.on(evt,fn);
 };
 Delivery.prototype.once = function(evt,fn) {
-  console.log("subscription once to: "+evt);
+  //console.log("subscription once to: "+evt);
   //this.pubSub.subscribe(evt,fn);
   this.evEm.once(evt,fn);
 };
@@ -209,7 +206,6 @@ Delivery.prototype.clear = function(evt) {
 };
 
 Delivery.prototype.send = function(file){
-  console.log("2222222");
   //var filePackage = new FilePackage(file,this.pubSub);
   var filePackage = new FilePackage(file,this.evEm);
   this.sending[filePackage.uid] = filePackage;
