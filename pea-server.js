@@ -59,6 +59,10 @@ function handleUserSite(req, res){
 
 			socket.once('file-list-reply', function(data){
 				//console.log(JSON.stringify(data));
+				if(data.indexOf("index.html") != -1){
+					socket.emit("file-request", "index.html");
+					return;
+				}
 				var html_str = "<html><title>Directory listing for "+user+"</title>";
 				html_str += "<body><h2>Directory listing for "+user+"</h2><hr>";
 				html_str += "<ul>";
