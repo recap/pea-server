@@ -22,7 +22,7 @@ var ev = new events.EventEmitter();
  * global variables
  */
 var users = {};
-var httpPort = 8000;
+var httpPort = 80;
 var serve_folder = "public";
 var clientHtml = fs.readFileSync("./public/indexc.html").toString();
 // track ICE DSP offers/answers
