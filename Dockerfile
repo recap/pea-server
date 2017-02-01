@@ -6,7 +6,6 @@ RUN mkdir /app/public
 
 
 ADD pea-server.js /app/
-ADD delivery.server.js /app/
 ADD public /app/public/
 
 RUN npm install http
