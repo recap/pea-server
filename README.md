@@ -1,7 +1,7 @@
 # pea-server
 ##
-A browser based web server. Files are hosted inside the web browser, a proxy server in Node.js proxies the requests from 
-client web browsers to server web browsers. 
+A browser based p2p ftp server. Files are hosted inside the web browser, a signal server in Node.js is used to setup webrtc channels
+between client browser and server browser.
 
 ## Example
 A running example can be found ad http://dataplane.io

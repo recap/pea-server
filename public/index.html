@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html>
-<title>Pea Server</title>
+<title> 2 Pea ftp</title>
+<meta charset="UTF-8"> 
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<script src="/js/jquery-1.7.1.min.js"></script>
-<script src="/js/jquery.qrcode.min.js"></script>
-<script src="/socket.io/socket.io.js"></script>
-<script src="/js/delivery.js"></script>
 <link rel="stylesheet" href="http://www.w3schools.com/lib/w3.css">
+
+
 <style>
+html, body{
+	height:100%;
+	width:100%;
+}
 .file-upload {
     position: relative;
     overflow: hidden;
@@ -24,17 +27,37 @@
     opacity: 0;
     filter: alpha(opacity=0);
 }
+#log{
+ background-color: #000000;
+    font-family: consolas,"courier new",monospace;
+    font-size: 10px;
+    height: 100%;
+    width: 100%;
+    padding: 8px;
+    resize: none;
+    border: none;
+    line-height: normal;
+    color: #ffffff;
+
+}
 </style>
+
+<script src="/js/jquery-1.7.1.min.js"></script>
+<script src="/js/jquery.qrcode.min.js"></script>
+<script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/js/common.js"></script>
+<script src="/js/main.js"></script>
 <body>
 
 <div class="w3-container w3-green">
-  <h1>Pea Server</h1> 
-  <p>A short-lived personal web server.</p> 
+  <h1>2 Pea Ftp</h1> 
+  <p>A browser p2p ftp server</p> 
 </div>
 
 <!--<div class="w3-col-padding">-->
   <div class="w3-container">
-  <h2>pea site name</h2>
+  <h2>pea name</h2>
   <p><input id="id" class="w3-input"></input></p>
   <div id="qrcode"></div>
   <div id="url"></div>
@@ -46,105 +69,23 @@
 	<input  id="files" multiple='true' type="file" class="upload" />
 	</div>
     <button id="start" class="w3-btn w3-padding-large w3-white w3-border w3-hover-border-black"><b>START PEA SERVER</b></button>
-    <button id="btn_log" class="w3-btn w3-padding-large w3-white w3-border w3-hover-border-black"><b>SHOW LOG</b></button>
+    <!--<button id="btn_log" class="w3-btn w3-padding-large w3-white w3-border w3-hover-border-black"><b>SHOW LOG</b></button>-->
+    <button id="btn_log" class="w3-btn"><b>log</b></button>
   </div>
+  <div id="url" class="w3-container"></div>
 
-  <div class="w3-container">
-  <p></p>
-  <div id="log" class="w3-container w3-black">
-	</div>
-  </div>
+  <textarea id="log" class="log" readonly></textarea>
 </div>
 
 </body>
 <script>
-
-function weblog(message, type){
-	if(type == undefined){
-		type = "info";
-	}
-    $('#log').append('<p>['+type+'] ' + message + '</p>');
- 
-}
-
-var user_id = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5);
-//var user_id = "tester";
-$('#id').val(user_id);
-$('#log').hide();
-weblog("started log.");
-
-
-
-</script>
-<script>
-	var file_hash = {};
-	var server_url = "http://"+location.host;
+        $( document ).ready(function() {
+		document.getElementById('btn_log').addEventListener('click', function(){$('#log').toggle();}, false);
+		document.getElementById('files').addEventListener('change', handleFileSelect, false);
+		document.getElementById('start').addEventListener('click', listen, false);
+		init();
+	});
 	
-
-	function handleFileSelect(evt) {
-	    var files = evt.target.files; // FileList object
-
-	    // files is a FileList of File objects. List some properties.
-	    var output = [];
-	    for (var i = 0, f; f = files[i]; i++) {
-		
-		//output.push('<li><strong>', escape(f.name), '</strong> (', f.type || 'n/a', ') - ',
-		//	  f.size, ' bytes, last modified: ',
-		//	  f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a',
-		//	  '</li>');
-		file_hash[escape(f.name)] = f;
-		weblog("added: "+escape(f.name));
-	    }
-	  }
-
-	function startServer(evt){
-		$("#id").prop('disabled', true);
-		console.log("s0");
-		weblog("starting server...");
-		var socket = io.connect(server_url);
-		weblog("server started.");
-		var user_id = $('#id').val();
-		console.log("s1");
-		var cnt = 0;
-		var delivery = new Delivery(socket);
-		delivery.on('delivery.connect', function(delivery){
-			//console.log("connected");
-		});
-		delivery.on('send.success', function(fileUID){
-			console.log("file was sent ok.");
-			weblog("file sent OK: "+fileUID.name);
-		});
-
-		socket.on("file-request", function(data){
-			console.log("rec: "+data);
-            		weblog("requesting file: "+data);
-			var filename = data;
-			if(filename in file_hash){
-				var f = file_hash[filename];
-				delivery.send(f);
-			}
-		});
-		socket.on('file-list-request', function(data){
-			var file_array = [];
-			Object.keys(file_hash).forEach(function(key){
-				file_array.push(key);
-			});
-			socket.emit('file-list-reply', file_array);
-		});
-		socket.on('hand-shake-ack', function(){
-			weblog("connected to: "+server_url);
-			$('#div2').hide();	
-			var url_str = server_url+"/"+user_id+"/";
-			$('#qrcode').qrcode(url_str);
-			document.getElementById('url').innerHTML = "<a target=_blank href="+url_str+">"+url_str+"</a>";
-		});
-		
-		socket.emit("hand-shake", { user: user_id });
-	}
-
-	document.getElementById('files').addEventListener('change', handleFileSelect, false);
-	document.getElementById('start').addEventListener('click', startServer, false);
-	document.getElementById('btn_log').addEventListener('click', function(){$('#log').show();}, false);
 </script>
 </html>
 
