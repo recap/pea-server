@@ -20,8 +20,7 @@ var peers = {};
 
 function init(){
 	$('#id').val(user_id);
-	//$('#log').hide();
-	//weblog("started log.");
+	$('#start').attr('disabled', true);
 }
 
 function listen(url){
@@ -33,6 +32,8 @@ function listen(url){
 	socket.emit('webrtc-register', JSON.stringify({"uid" : user_id}));
 	weblog("started file server at "+server_url+"/"+user_id+"/");
 	$("#url").html("<a href="+server_url+"/"+user_id+"/ target=_blank>client: "+server_url+"/"+user_id+"/</a>"); 
+	$('#id').attr('disabled', true);
+	$('#start').attr('disabled', true);
 }
 
 function connect(uid){
@@ -288,5 +289,7 @@ function handleFileSelect(evt) {
 	file_hash[escape(f.name)] = f;
 	weblog("added: "+escape(f.name));
     }
+	
+	$('#start').attr('disabled', false);
   }
 
