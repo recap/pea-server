@@ -122,12 +122,10 @@ socket.on('webrtc-message', function(data){
                         }else{
                                 var str = JSON.stringify({ "uid": user_id, "ruid": ruid, "webrtc" :  pc.localDescription });
                                 //socket.emit('desc', JSON.stringify({"uid" : user_id, "webrtc": pc.localDescription}));
-                                trace("ANSWER: "+str);
+                                //trace("ANSWER: "+str);
                                 socket.emit("webrtc-dsp", str);
                         }
-
                 }
-
             })
             .catch(logError);
         } else{
@@ -140,31 +138,14 @@ socket.on('webrtc-message', function(data){
 	}
 });
 
-
-/*function startServer(){
-	start(true);
-}
-
-function start(isInitiator) {
-
-    if (isInitiator) {
-        // create data channel and setup chat
-        channel = pc.createDataChannel("chat");
-        setupChat();
-    } else {
-        // setup chat on incoming data channel
-        socket.emit("get-offer", JSON.stringify({"uid": user_id, "ruid":$("#userToConnect").val()}));
-        pc.ondatachannel = function (evt) {
-            channel = evt.channel;
-            setupChat();
-        };
-    }
-}*/
-
 function handleChannelServer(channel, peer_id) {
     channel.onopen = function () {
 	weblog("webrtc channel open to "+peer_id);
     };
+
+	channel.onerror = function(error){
+		weblog(error, "error");
+	};
 
     channel.onmessage = function (evt) {
 	//trace("receiving msg");
@@ -188,21 +169,16 @@ function handleChannelServer(channel, peer_id) {
     };
 }
 
-
 function handleChannelClient(channel) {
     var receiveBuffer = [];
     var receivedSize = 0;
     var file = null;
     channel.onopen = function () {
-        // e.g. enable send button
-        //enableChat(channel);
         trace("channel open");
         channel.send(JSON.stringify({"uid": user_id, "type": "file-list"}));
     };  
     
     channel.onmessage = function (evt) {
-        //trace("receiving msg");
-        //trace(evt.data);
         var msg;
         if (file){
 		var d = evt.data;
@@ -212,21 +188,18 @@ function handleChannelClient(channel) {
                 }else{  
                         receivedSize += d.size;
                 }       
-                //trace(receivedSize);
-                trace(d.size);
+				var p = Math.floor((receivedSize/file.size) * 100);
+				var progressId = "#PROG"+file.name.hashCode()+"PROG";
+				trace("file download: "+p+"%");
+				$(progressId).attr('value', p)
                 if (receivedSize === file.size) {
                         var received = new window.Blob(receiveBuffer, {type:file.type});
-                        
                         var href = URL.createObjectURL(received)
                         receiveBuffer = [];
                         receivedSize = 0;
                         var id = "#"+file.name.hashCode();
-                        
-                        //var id = "#"+file.name;
-                        $(id).text(" view/download");
+                        $(id).text("view/download");
                         $(id).attr('href', href);
-                        trace("received:" +href);
-                        trace(id);
                         file = null;
                 }       
         }else{  
@@ -240,7 +213,7 @@ function handleChannelClient(channel) {
                         file_list.forEach(function(item) {
                                 var i1 = btoa(item);
                                 var i2 = btoa(item+".blob");
-                                html_str += "<li><a id="+item+" href=# onclick='requestFile(this,\""+msg.uid+"\")'>"+item+"</a><a target='_blank' href=# id="+item.hashCode()+"></a></li>";
+                                html_str += "<li><a id="+item+" class='file-item' href=# onclick='requestFile(this,\""+msg.uid+"\")'>"+item+"</a><progress id=PROG"+item.hashCode()+"PROG max='100' value='0'/><a class='file-item' target='_blank' href=# id="+item.hashCode()+"></a></li>";
                                 
                         });     
                         html_str += "</ul>";
