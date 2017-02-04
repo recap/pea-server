@@ -37,14 +37,14 @@ ul {
 	var client = true;
 	var remote_peer_id = "333444PQR";
 	$( document ).ready(function() {
-		$("#banner").text("Directory listing for peer "+remote_peer_id);
+		$("#banner").html("<h2>Connecting to: "+remote_peer_id+"</h2>");
 		connect(remote_peer_id);
 	});	
 </script>
 
 <body>
 
-<h2 id="banner"></h2>
+<div id="banner"></div>
 <div id="maindiv"></div>
 </body>
 </html>

@@ -176,6 +176,7 @@ function handleChannelClient(channel) {
     var file = null;
     channel.onopen = function () {
         trace("channel open");
+		$('#banner').html("<h2>Connected to: "+remote_peer_id+"</h2><h3>File list:-</h3>");
         channel.send(JSON.stringify({"uid": user_id, "type": "file-list"}));
     };  
     
