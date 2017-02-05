@@ -7,11 +7,15 @@ process.title = 'pea-server';
 
 // websocket and http servers
 var http = require('http');
+var https = require('https');
+var querystring = require('querystring');
 var url = require('url');
 var path = require('path');
 var qs = require('querystring');
+var cron = require('node-schedule');
 var finalhandler = require('finalhandler');
 var serveStatic = require('serve-static');
+var common = require('./common');
 //var dl = require('./delivery.server');
 var fs = require('fs');
 var serve = serveStatic("./public/");
@@ -22,8 +26,9 @@ var ev = new events.EventEmitter();
  * global variables
  */
 var users = {};
-var httpPort = 80;
+var httpPort = 8080;
 var serve_folder = "public";
+var details = null;
 var clientHtml = fs.readFileSync("./public/indexc.html").toString();
 // track ICE DSP offers/answers
 var dsps = {}
@@ -31,6 +36,16 @@ var dsps = {}
 var candidates = {}
 // track websocket open sockets
 var socks = {}
+
+
+/**
+ * run once a day at 2:17am
+ *
+ */
+cron.scheduleJob('17 2 * * *', function(){
+	getData(common.details);
+});
+getData(common.details);
 
 /**
  * main HTTP server. Serving files from serve_folder.
@@ -90,6 +105,8 @@ function handleUserSite(req, res){
 var io = require('socket.io').listen(server);
 io.on('connection', function(socket){
 
+    socket.emit('connect', null);	
+
 	socket.on('webrtc-register', function(data){
 		var jd = JSON.parse(data);
 		var uid = jd["uid"];
@@ -109,6 +126,11 @@ io.on('connection', function(socket){
 		  s.emit("webrtc-connection", data);
 		}
 		
+	});
+
+    socket.on('details-req', function(data){
+        //console.log("details req");
+		if(details != null)	socket.emit('details-res', JSON.stringify(details));
 	});
 
 	socket.on('candidate', function(data){
@@ -175,3 +197,48 @@ var user_log = function(user, message){
 		}
 		console.log("["+user+"] "+message);
 	};
+
+function getData(postDetails){
+		if(postDetails.host == null){
+			return null;
+		}
+		//console.log(JSON.stringify(postDetails));
+        
+		var data = querystring.stringify(postDetails.data);
+
+        var options = {
+                host: postDetails.host,
+                port: postDetails.port,
+                path: postDetails.path,
+                method: 'POST',
+                headers: {
+                        'User-Agent': postDetails.useragent,
+                        'origin' : postDetails.origin,
+                        'Referer' : postDetails.referer,
+                        'DNT' : postDetails.dnt,
+                        'Accept' : postDetails.accept,
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Content-Length': Buffer.byteLength(data)
+                }
+        }
+
+        var req = https.request(options, function(res) {
+                res.setEncoding('utf8');
+                res.on('data', function (chunk) {
+ 						console.log(chunk);
+                        var jd = JSON.parse(chunk);
+                        details = jd;
+                });
+        });
+
+        req.write(data);
+        req.end();
+}
+
+
+
+
+
+
+
+

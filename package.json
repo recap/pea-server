@@ -1,7 +1,7 @@
 {
   "name": "pea-server",
   "version": "1.0.0",
-  "description": "",
+  "description": "A browser based p2p ftp server. Files are hosted inside the web browser, a signal server in Node.js is used to setup webrtc channels between client browser and server browser.",
   "main": "pea-server.js",
   "dependencies": {
     "events": "^1.1.1",
@@ -31,6 +31,5 @@
     "server"
   ],
   "author": "Reggie Cushing",
-  "license": "ISC"
+  "license": "BSD-2-Clause"
 }
-

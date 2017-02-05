@@ -3,7 +3,6 @@
 
 var receivedSize = 0;
 var bytesToSend = 0;
-
 var configuration = {
 	iceServers: [
 		{urls: ["stun:stun.l.google.com:19302"]}
@@ -23,11 +22,12 @@ function init(){
 	$('#start').attr('disabled', true);
 }
 
+
+
 function listen(url){
 	if(!(url)){
 		url = server_url
 	}
-	//socket = io.connect(url);
 	// register socket on signal server
 	socket.emit('webrtc-register', JSON.stringify({"uid" : user_id}));
 	weblog("started file server at "+server_url+"/"+user_id+"/");
@@ -52,6 +52,10 @@ socket.on('webrtc-connection', function(data){
 	var peer_id = jd["uid"];
 	weblog("connection request from "+peer_id);
         var pc = new RTCPeerConnection(configuration);
+		pc.onerror = function(error){
+			weblog(error, "error");
+			console.log(error);
+		}
 
     	// send any ice candidates to the other peer
     	pc.onicecandidate = function (evt) {
@@ -83,6 +87,16 @@ socket.on('webrtc-connection', function(data){
 	// keep track of channel and connection
 	peers[peer_id] = {"pc" : pc, "channel" : channel};
 	handleChannelServer(channel, peer_id);
+});
+
+socket.on('connect', function(){
+	socket.emit('details-req', "");	
+});
+
+socket.on('details-res', function(data){
+    //trace('config: '+data);
+	var jd = JSON.parse(data);
+    configuration = jd;
 });
 
 socket.on('webrtc-message', function(data){
