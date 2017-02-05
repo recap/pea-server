@@ -14,7 +14,8 @@
     "serve-static": "^1.11.2",
     "socket.io": "^1.7.2",
     "url": "^0.11.0",
-    "uuid": "^3.0.1"
+    "uuid": "^3.0.1",
+    "node-schedule": "~1.2.0"
   },
   "devDependencies": {},
   "scripts": {
