@@ -216,6 +216,7 @@ function handleChannelClient(channel) {
                         var id = "#"+file.name.hashCode();
                         $(id).text("view/download");
                         $(id).attr('href', href);
+			$(id).attr('download', file.name);
                         file = null;
                 }       
         }else{  
