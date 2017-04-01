@@ -217,6 +217,9 @@ function handleChannelClient(channel) {
                         $(id).text("download");
                         $(id).attr('href', href);
 			$(id).attr('download', file.name);
+			var idView = "#"+file.name.hashCode()+"VW";
+                        $(idView).text("view");
+                        $(idView).attr('href', href);
                         file = null;
                 }       
         }else{  
@@ -230,7 +233,9 @@ function handleChannelClient(channel) {
                         file_list.forEach(function(item) {
                                 var i1 = btoa(item);
                                 var i2 = btoa(item+".blob");
-                                html_str += "<li><a id="+item+" class='file-item' href=# onclick='requestFile(this,\""+msg.uid+"\")'>"+item+"</a><progress id=PROG"+item.hashCode()+"PROG max='100' value='0'/><a class='file-item' target='_blank' href=# id="+item.hashCode()+"></a></li>";
+                                html_str += "<li><a id="+item+" class='file-item' href=# onclick='requestFile(this,\""+msg.uid+"\")'>"+item+"</a><progress id=PROG"+item.hashCode()+"PROG max='100' value='0'/>" + 
+									"<a class='file-item' target='_blank' href=# id="+item.hashCode()+"></a>" +
+									"<a class='file-item' target='_blank' href=# id="+item.hashCode()+"VW></a></li>";
                                 
                         });     
                         html_str += "</ul>";
