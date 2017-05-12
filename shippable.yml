@@ -4,7 +4,7 @@ node_js:
 
 build:
     pre_ci:
-        - docker ps | grep qahba | awk '{print $1}' | xargs docker rm 2>/dev/null
+        - perl clean.pl
         - docker build -t pea .
     ci:
         - docker run --name qahba -t -p 8080:8080 pea
