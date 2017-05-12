@@ -1,0 +1,10 @@
+language: node_js
+node_js:
+    - 4.2.3
+
+build:
+    pre_ci:
+        - docker build -t peaCI .
+    ci:
+        - docker run -t -p 8080:8080 peaCI
+
