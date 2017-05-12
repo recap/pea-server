@@ -9,7 +9,7 @@ build:
         - docker build -t pea .
     ci:
         - docker run --name qahba -d  pea
-        - sleep 1
+        - sleep 10
         - perl test.pl
         - docker stop qahba
         - docker rm qahba
