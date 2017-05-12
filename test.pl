@@ -1,5 +1,5 @@
-$ip_ = `docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' qahba`;
-$ip = chomp($ip_);
+$ip = `docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' qahba`;
+chomp($ip);
 print($ip);
 $log = `curl -i $ip:8080`;
 $out = `curl -i $ip:8080 2>/dev/null | grep -e ^HTTP | awk '{print \$2}'`;
