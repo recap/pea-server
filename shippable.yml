@@ -7,7 +7,6 @@ build:
         - docker build -t pea .
     ci:
         - docker run --name qahba -t -p 8080:8080 pea
-    post_ci:
         - perl test.pl
         - docker stop qahba
         - docker rm qahba
