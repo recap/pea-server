@@ -4,7 +4,7 @@ node_js:
 
 build:
     pre_ci:
-        - docker build -t peaCI .
+        - docker build -t pea .
     ci:
-        - docker run -t -p 8080:8080 peaCI
+        - docker run -t -p 8080:8080 pea
 
