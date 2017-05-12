@@ -4,13 +4,11 @@ node_js:
 
 build:
     pre_ci:
-        #- docker build -t pea .
-        #- docker stop $(docker ps -q -a)
-        #- docker rm $(docker ps -q -a)
-        docker ps -q -a
-    #ci:
-    #    - docker run --name qahba -t -p 8080:8080 pea
-    #post_ci:
-    #    - perl test.pl
-    #    - docker stop qahba
+        - docker build -t pea .
+        - docker rm qahba
+    ci:
+        - docker run --name qahba -t -p 8080:8080 pea
+    post_ci:
+        - perl test.pl
+        - docker stop qahba
 
