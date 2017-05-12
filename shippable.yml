@@ -5,6 +5,7 @@ node_js:
 build:
     pre_ci:
         - perl clean.pl
+        - docker ps
         - docker build -t pea .
     ci:
         - docker run --name qahba -t -p 8080:8080 pea
