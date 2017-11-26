@@ -13,5 +13,5 @@ ADD public /app/public/
 RUN npm install 
 
 
-CMD ["node", "pea-server.js"]
+CMD ["node", "pea-server.js", "80", "443"]
  
