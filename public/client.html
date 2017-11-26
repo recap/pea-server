@@ -34,8 +34,22 @@ ul {
 <script src="/js/common.js"></script>
 <script src="/js/main.js"></script>
 <script>
+    function GetURLParameter(sParam)
+	{
+		var sPageURL = window.location.search.substring(1);
+		var sURLVariables = sPageURL.split('&');
+		for (var i = 0; i < sURLVariables.length; i++) 
+		{
+			var sParameterName = sURLVariables[i].split('=');
+			if (sParameterName[0] == sParam) 
+			{
+				return sParameterName[1];
+			}
+		}
+	}
+
 	var client = true;
-	var remote_peer_id = "333444PQR";
+	var remote_peer_id = GetURLParameter('sessionId');
 	$( document ).ready(function() {
 		$("#banner").html("<h2>Connecting to: "+remote_peer_id+"</h2>");
 		connect(remote_peer_id);

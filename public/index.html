@@ -3,7 +3,7 @@
 <title> 2 Pea ftp</title>
 <meta charset="UTF-8"> 
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="http://www.w3schools.com/lib/w3.css">
+<link rel="stylesheet" href="https://www.w3schools.com/lib/w3.css">
 
 
 <style>
@@ -52,37 +52,34 @@ html, body{
 
 <div class="w3-container w3-green">
   <h1>2 Pea Ftp</h1> 
-  <p>A browser p2p ftp server</p> 
+  <p><a href="http://github.com/recap/pea-server" target=_blank>Secure peer-to-peer file transfer.</a></p>
 </div>
 
 <!--<div class="w3-col-padding">-->
   <div class="w3-container">
-  <h2>pea name</h2>
-  <p><input id="id" class="w3-input"></input></p>
+  <input id="id" type="hidden" class="w3-input"></input>
+  <div class="w3-display-middle">
+  <div  class="file-upload w3-btn w3-padding-large w3-white w3-border w3-hover-border-black center">
+	<span><b>ADD FILES</b></span>
+	<input  id="files" multiple='true' type="file" class="upload" />
+  </div>
+  <button id="btn_log" class="w3-btn">log</button>
   <div id="qrcode"></div>
   <div id="url"></div>
   </div>
 
-  <div id="div2" class="w3-container">
-    <div  class="file-upload w3-btn w3-padding-large w3-white w3-border w3-hover-border-black">
-	<span><b>ADD FILES</b></span>
-	<input  id="files" multiple='true' type="file" class="upload" />
-	</div>
-    <button id="start" class="w3-btn w3-padding-large w3-white w3-border w3-hover-border-black"><b>START PEA SERVER</b></button>
-    <!--<button id="btn_log" class="w3-btn w3-padding-large w3-white w3-border w3-hover-border-black"><b>SHOW LOG</b></button>-->
-    <button id="btn_log" class="w3-btn"><b>log</b></button>
+  <div id="donate" class="w3-display-bottommiddle">
+	  <p>Donations: 1AYd4ieDajZourkaXaShDES19qLZG1nZDy</p>
   </div>
-  <div id="url" class="w3-container"></div>
-
+  </div>
   <textarea id="log" class="log" readonly></textarea>
 </div>
 
 </body>
 <script>
         $( document ).ready(function() {
-		document.getElementById('btn_log').addEventListener('click', function(){$('#log').toggle();}, false);
+		document.getElementById('btn_log').addEventListener('click', function(){$('#log').toggle(); $('#qrcode').toggle();}, false);
 		document.getElementById('files').addEventListener('change', handleFileSelect, false);
-		document.getElementById('start').addEventListener('click', listen, false);
 		init();
 	});
 	
