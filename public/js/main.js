@@ -34,7 +34,7 @@ function listen(url) {
     $("#url").html("<a href=" + serverUrl + "/" + userId + " target=_blank>" + serverUrl + "/" + userId + "</a>");
     $('#id').attr('disabled', true);
     $('#start').attr('disabled', true);
-	$('#qrcode').qrcode(serverUrl);
+	$('#qrcode').qrcode(serverUrl + '/' + userId);
 }
 
 function connect(uid) {
