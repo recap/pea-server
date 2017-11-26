@@ -18,6 +18,8 @@ var peers = {};
 function init() {
     $('#id').val(userId);
     $('#start').attr('disabled', true);
+	$('#log').toggle();
+	listen();
 }
 
 function listen(url) {
@@ -29,9 +31,10 @@ function listen(url) {
         "uid": userId
     }));
     weblog("started file server at " + serverUrl + "/" + userId);
-    $("#url").html("<a href=" + serverUrl + "/" + userId + " target=_blank>client: " + serverUrl + "/" + userId + "</a>");
+    $("#url").html("<a href=" + serverUrl + "/" + userId + " target=_blank>" + serverUrl + "/" + userId + "</a>");
     $('#id').attr('disabled', true);
     $('#start').attr('disabled', true);
+	$('#qrcode').qrcode(serverUrl);
 }
 
 function connect(uid) {
@@ -119,7 +122,7 @@ socket.on('webrtc-message', function(data) {
 		pc.onerror = function(error) {
 			weblog(error, "error");
 			trace(error);
-		});
+		}
         pc.ondatachannel = function(evt) {
             var channel = evt.channel;
             peers[ruid] = {
