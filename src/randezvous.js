@@ -5,11 +5,12 @@ const common = require('./common');
 const websocket = require('socket.io');
 const cron = require('node-schedule');
 const events = require('events');
+const querystring = require('querystring');
+const https = require('https');
 
 /**
  * global variables
  */
-const users = {};
 let  details = null;
 const ev = new events.EventEmitter();
 // track ICE DSP offers/answers
@@ -18,6 +19,9 @@ const dsps = {}
 const candidates = {}
 // track websocket open sockets
 const socks = {};
+const timers = {};
+// 1 hr cache time;
+const maxCacheTime = 3600000; 
 
 /**
  * run once a day at 2:17am
@@ -33,6 +37,25 @@ module.exports.startWebSocket = function(server) {
 	io.on('connection', startSocketEvents);
 };
 
+setInterval(() => {
+	const t2 = new Date().getTime();
+	const purgeIds = [];
+	Object.keys(timers).forEach((id) => {
+		const t1 = timers[id];
+		if (t2 - t1 > maxCacheTime) {
+			purgeIds.push(id);	
+		}
+	});
+	purgeIds.forEach((id) => {
+		if (socks[id]) {
+			delete socks[id];
+		}
+		if (timers[id]) {
+			delete timers[id];
+		}
+	});
+}, 10000);
+
 /**
  * handle communication events between server and browser
  */
@@ -43,6 +66,7 @@ function startSocketEvents(socket) {
 		const jd = JSON.parse(data);
 		const uid = jd["uid"];
 		socks[uid] = socket;
+		timers[uid] = new Date().getTime();
 		console.log(uid+" registerd.");
 	});
 	
@@ -51,6 +75,7 @@ function startSocketEvents(socket) {
 		const jd = JSON.parse(data);
 		const uid = jd["uid"];
 		socks[uid] = socket;
+		timers[uid] = new Date().getTime();
 		console.log(uid+" registerd.");
 		
 		if(jd.ruid in socks){
@@ -65,17 +90,22 @@ function startSocketEvents(socket) {
 		if(details != null)	socket.emit('details-res', JSON.stringify(details));
 	});
 
-	socket.on('candidate', function(data){
+	socket.on('webrtc-candidate', function(data){
 		const jd = JSON.parse(data);
 		const uid = jd["uid"]
-		const cand = jd["webrtc"]
-		if(uid in candidates){
-			candidates[uid].push(cand);
-		}else{
-			candidates[uid] = []
-			candidates[uid].push(cand);
+		const ruid = jd["ruid"];
+		const cand = jd["candidate"];
+		if (ruid in socks) {
+			const s = socks[ruid];
+			s.emit("webrtc-message", JSON.stringify({
+				"uid": ruid,
+				"ruid": uid,
+				"webrtc": {
+					"type" : "candidate",
+					"candidate": cand
+				}
+			}));
 		}
-		console.log(JSON.stringify(data));
 	});
 
 	socket.on('webrtc-dsp', function(data){
