@@ -14,7 +14,6 @@
     "path": "^0.12.7",
     "querystring": "^0.2.0",
     "serve-static": "^1.11.2",
-    "shortid": "2.2.8",
     "socket.io": "^1.7.2",
     "url": "^0.11.0",
     "uuid": "^3.0.1"
