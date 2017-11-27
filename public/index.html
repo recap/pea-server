@@ -77,12 +77,15 @@ html, body{
 					<a id="copy" href="#" class="w3-bar-item w3-button">
 						<i class="fa fa-clipboard" style="font-size:24px">
 						</i>
+						Clipboard
 					</a>
-					<a id="whatsapp" href="#" target=_blank class="w3-bar-item w3-button">
+					<a id="whatsapp" href="#" target=_blank data-action="share/whatsapp/share" class="w3-bar-item w3-button">
 						<i class="fa fa-whatsapp" style="font-size:24px"></i>
+						Whatsapp
 					</a>
 					<a id="email" href="#" class="w3-bar-item w3-button">
 						<i class="fa fa-at" style="font-size:24px"></i>
+						Email
 					</a>
 				</div>
 			</button>
@@ -134,7 +137,7 @@ html, body{
 
 		document.getElementById('files').addEventListener('change', handleFileSelect, false);
 		init();
-		$('#whatsapp').attr('href', "whatsapp://send?" + serverUrl +'/'+userId);
+		$('#whatsapp').attr('href', "whatsapp://send?text=" + serverUrl + '/' + userId);
 		$('#email').attr('href', "mailto:?subject=Dataplane%20share%20files&body=" + serverUrl + '/' + userId);
 	});
 	
