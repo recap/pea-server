@@ -4,6 +4,7 @@
 <meta charset="UTF-8"> 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="https://www.w3schools.com/lib/w3.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
 
 <style>
@@ -28,8 +29,8 @@ html, body{
     filter: alpha(opacity=0);
 }
 .icon {
-	width: 50px;
-	height: 50px;
+	width: 30px;
+	height: 30px;
 }
 #log{
  background-color: #000000;
@@ -58,36 +59,53 @@ html, body{
   <p>Pea server: secure peer-to-peer file transfer</p>
 </div>
 
-<!--<div class="w3-col-padding">-->
-  	<textarea id="log" class="log" readonly></textarea>
-  <div class="w3-container">
+
+
+<div class="w3-container w3-center">
 	<input id="id" type="hidden" class="w3-input"></input>
-    <div class="w3-display-bottommiddle">
 	<div class="w3-bar">
-  		<button class="w3-button w3-white">
+  		<button class="w3-bar-item w3-button w3-white">
 			<div  class="file-upload">
-				<span><img src='add_file-256.png' class="icon" /></span>
+				<i class="fa fa-upload" style="font-size:36px"></i>
 				<input  id="files" multiple='true' type="file" class="upload" />
 			</div>
 		</button>
-  		<button id="copy" class="w3-button w3-white">
-		<img src="clipboard.png" class="icon"/>
+			
+    		<button class="w3-bar-item w3-dropdown-hover w3-button w3-white" >
+				<i class="fa fa-share-alt" style="font-size:36px"></i>
+				<div class="w3-dropdown-content w3-bar-block w3-border">
+					<a id="copy" href="#" class="w3-bar-item w3-button">
+						<i class="fa fa-clipboard" style="font-size:24px">
+						</i>
+					</a>
+					<a id="whatsapp" href="#" target=_blank class="w3-bar-item w3-button">
+						<i class="fa fa-whatsapp" style="font-size:24px"></i>
+					</a>
+					<a id="email" href="#" class="w3-bar-item w3-button">
+						<i class="fa fa-at" style="font-size:24px"></i>
+					</a>
+				</div>
+			</button>
+  		<button id="btn_log" class="w3-bar-item w3-button w3-white">
+			<i class="fa fa-terminal" style="font-size:36px"></i>
 		</button>
-  		<button id="btn_log" class="w3-button w3-white">
-			<img src='terminal.png' class="icon" />
-		</button>
-  		<button id="info" class="w3-button w3-white">
+  		<button id="info" class="w3-bar-item w3-button w3-white">
 			<a href="http://github.com/recap/pea-server" target=_blank>
-				<img src='info.png' class="icon" />
+				<i class="fa fa-github" style="font-size:36px"></i>
 			</a>
 		</button>
 
 	</div>
-	</div>
-	<div class="w3-display-middle">
-		<div id="qrcode"></div>
-		<div id="url" icontenteditable="true"></div>
-	</div>
+</div>
+
+<textarea id="log" class="log" readonly></textarea>
+
+<div class="w3-container w3-center">
+	</br>
+	</br>
+	</br>
+	<div id="qrcode"></div>
+	<div id="url" icontenteditable="true"></div>
 </div>
 
 </body>
@@ -116,6 +134,8 @@ html, body{
 
 		document.getElementById('files').addEventListener('change', handleFileSelect, false);
 		init();
+		$('#whatsapp').attr('href', "whatsapp://send?" + serverUrl +'/'+userId);
+		$('#email').attr('href', "mailto:?subject=Dataplane%20share%20files&body=" + serverUrl + '/' + userId);
 	});
 	
 </script>
