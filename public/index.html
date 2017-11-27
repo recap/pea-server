@@ -14,7 +14,7 @@ html, body{
 .file-upload {
     position: relative;
     overflow: hidden;
-    margin: 10px;
+    margin: 0px;
 }
 .file-upload input.upload {
     position: absolute;
@@ -26,6 +26,10 @@ html, body{
     cursor: pointer;
     opacity: 0;
     filter: alpha(opacity=0);
+}
+.icon {
+	width: 50px;
+	height: 50px;
 }
 #log{
  background-color: #000000;
@@ -51,33 +55,65 @@ html, body{
 <body>
 
 <div class="w3-container w3-green">
-  <p><a href="http://github.com/recap/pea-server" target=_blank>Pea server: secure peer-to-peer file transfer.</a></p>
+  <p>Pea server: secure peer-to-peer file transfer</p>
 </div>
 
 <!--<div class="w3-col-padding">-->
+  	<textarea id="log" class="log" readonly></textarea>
   <div class="w3-container">
-  <input id="id" type="hidden" class="w3-input"></input>
-  <div class="w3-display-middle">
-  <div  class="file-upload w3-btn w3-padding-large w3-white w3-border w3-hover-border-black center">
-	<span><b>ADD FILES</b></span>
-	<input  id="files" multiple='true' type="file" class="upload" />
-  </div>
-  <button id="btn_log" class="w3-btn">log</button>
-  <div id="qrcode"></div>
-  <div id="url"></div>
-  </div>
+	<input id="id" type="hidden" class="w3-input"></input>
+    <div class="w3-display-bottommiddle">
+	<div class="w3-bar">
+  		<button class="w3-button w3-white">
+			<div  class="file-upload">
+				<span><img src='add_file-256.png' class="icon" /></span>
+				<input  id="files" multiple='true' type="file" class="upload" />
+			</div>
+		</button>
+  		<button id="copy" class="w3-button w3-white">
+		<img src="clipboard.png" class="icon"/>
+		</button>
+  		<button id="btn_log" class="w3-button w3-white">
+			<img src='terminal.png' class="icon" />
+		</button>
+  		<button id="info" class="w3-button w3-white">
+			<a href="http://github.com/recap/pea-server" target=_blank>
+				<img src='info.png' class="icon" />
+			</a>
+		</button>
 
-  <div id="donate" class="w3-display-bottommiddle">
-	  <p>Donations: 1AYd4ieDajZourkaXaShDES19qLZG1nZDy</p>
-  </div>
-  </div>
-  <textarea id="log" class="log" readonly></textarea>
+	</div>
+	</div>
+	<div class="w3-display-middle">
+		<div id="qrcode"></div>
+		<div id="url" icontenteditable="true"></div>
+	</div>
 </div>
 
 </body>
 <script>
+	jQuery.fn.selectText = function(){
+	   var doc = document;
+	   var element = this[0];
+	   if (doc.body.createTextRange) {
+		   var range = document.body.createTextRange();
+		   range.moveToElementText(element);
+		   range.select();
+	   } else if (window.getSelection) {
+		   var selection = window.getSelection();        
+		   var range = document.createRange();
+		   range.selectNodeContents(element);
+		   selection.removeAllRanges();
+		   selection.addRange(range);
+	   }
+	};	
         $( document ).ready(function() {
 		document.getElementById('btn_log').addEventListener('click', function(){$('#log').toggle(); $('#qrcode').toggle();}, false);
+		document.getElementById('copy').addEventListener('click', function(){
+				$('#url').selectText();
+				document.execCommand('Copy', false, null);
+		}, false);
+
 		document.getElementById('files').addEventListener('change', handleFileSelect, false);
 		init();
 	});

@@ -31,7 +31,8 @@ function listen(url) {
         "uid": userId
     }));
     weblog("started file server at " + serverUrl + "/" + userId);
-    $("#url").html("<a href=" + serverUrl + "/" + userId + " target=_blank>" + serverUrl + "/" + userId + "</a>");
+    //$("#url").html("<a href=" + serverUrl + "/" + userId + " target=_blank>" + serverUrl + "/" + userId + "</a>");
+	$("#url").html("<p>" + serverUrl + '/' +userId + "</p>");
     $('#id').attr('disabled', true);
     $('#start').attr('disabled', true);
 	$('#qrcode').qrcode(serverUrl + '/' + userId);
