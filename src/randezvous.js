@@ -1,7 +1,7 @@
 // http://ejohn.org/blog/ecmascript-5-strict-mode-json-and-more/
 "use strict";
 
-const common = require('./common');
+const config = require('./config');
 const websocket = require('socket.io');
 const cron = require('node-schedule');
 const events = require('events');
@@ -28,9 +28,9 @@ const maxCacheTime = 3600000;
  *
  */
 cron.scheduleJob('17 2 * * *', function(){
-	getData(common.details);
+	getData(config.details);
 });
-getData(common.details);
+getData(config.details);
 
 module.exports.startWebSocket = function(server) {
 	const io = websocket.listen(server);

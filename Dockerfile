@@ -11,7 +11,7 @@ ADD package.json /app/
 ADD public /app/public/
 ADD src /app/src/
 ADD run.sh /app/run.sh
-ADD common.js.private /app/js/common.js
+ADD config.js.private /app/src/config.js
 WORKDIR /app/
 
 RUN npm install -g pm2
