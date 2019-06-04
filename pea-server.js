@@ -7,7 +7,6 @@ process.title = 'pea-server';
 
 // websocket and http servers
 const http = require('http');
-const https = require('https');
 const express = require('express');
 const fs = require('fs');
 const serveStatic = require('serve-static');
@@ -18,14 +17,11 @@ const randezvous = require('./src/randezvous');
  * global variables
  */
 const args = process.argv.slice(2);
-const httpPort = args.length > 0 && !isNaN(args[0]) ? args[0] : 8080;
-const httpsPort = args.length > 0 && !isNaN(args[0]) ? args[1] : 8181;
+const httpPort = args.length > 0 && !isNaN(args[0]) ? args[0] : 80;
 const serveFolder = "public";
 const app = express();
-const server = https.createServer({
-	key: fs.readFileSync('key.pem'),
-	cert: fs.readFileSync('cert.pem')
-}, app);
+const server = http.createServer(app);
+
 
 app.use(express.static(__dirname + '/' + serveFolder));
 
@@ -36,21 +32,11 @@ app.get('/:sessionId', (req, res) => {
 	}
 });
 
-/**
- * initiate HTTP server
- * redirect to HTTPS server
- */
-http.createServer(function (req, res) {
-	const host = req.headers['host'].split(":")[0] + ":" + httpsPort;
-    res.writeHead(301, { "Location": "https://" + host + req.url});
-    res.end();
-}).listen(httpPort);
+randezvous.startWebSocket(server);
 
-/**
- * initiate HTTPS server
+/*
+ * start our server
  */
-server.listen(httpsPort, function() {
-    console.log((new Date()) + " Http server is listening on ports " + [httpPort, httpsPort]);
-	randezvous.startWebSocket(server);
+server.listen(httpPort, () => {
+    console.log(`Server started on port ${server.address().port} :)`);
 });
-
