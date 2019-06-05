@@ -4,7 +4,27 @@
 <meta charset="UTF-8"> 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-progress {
+.progress {
+  height: 1.5em;
+  width: 100%;
+  background-color: #c9c9c9;
+  position: relative;
+}
+.progress:before {
+  content: attr(data-label);
+  font-size: 0.8em;
+  position: absolute;
+  text-align: center;
+  top: 5px;
+  left: 0;
+  right: 0;
+}
+.progress .value {
+  background-color: #7cc4ff;
+  display: inline-block;
+  height: 100%;
+}
+/*progress {
   color: #0063a6;
   font-size: .6em;
   line-height: 1.5em;
@@ -13,7 +33,7 @@ progress {
   height: 1.8em;
   border: 1px solid #0063a6;
   background: #fff;
-}
+}*/
 ul {
   list-style-type: none;
 }
@@ -51,15 +71,29 @@ ul {
 	var client = true;
 	var remote_peer_id = GetURLParameter('sessionId');
 	$( document ).ready(function() {
+		if (!isWebRTC) {
+			$('#warning').html("<h3>error: webRTC not supported!</h3>");
+			$('#warning').css('background-color', 'red');
+			return;
+		}
+		if ( (!isFirefox) && (!isChrome) && (!isOpera) ) {
+			$('#warning').html("<h3>warning: browser might not be supported!</h3>");
+			$('#warning').css('background-color', 'red');
+		}
+		if (!isChrome) {
+			$('#warning').html("<h3>warning: works best on Chrome especially for big files!</h3>");
+			$('#warning').css('background-color', 'red');
+		}
+
 		$("#banner").html("<h2>Connecting to: "+remote_peer_id+"</h2>");
 		connect(remote_peer_id);
 	});	
 </script>
 
 <body>
-
-<div id="banner"></div>
-<div id="maindiv"></div>
+	<div id="warning"></div>
+	<div id="banner"></div>
+	<div id="maindiv"></div>
 </body>
 </html>
 

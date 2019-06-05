@@ -227,6 +227,7 @@ function handleChannelClient(channel) {
     channel.onmessage = function(evt) {
         var msg;
         if (file) {
+			var fileIdHash = encodeURIComponent(file.name).hashCode();
             var d = evt.data;
             receiveBuffer.push(d);
             if ($.browser.webkit) {
@@ -235,9 +236,12 @@ function handleChannelClient(channel) {
                 receivedSize += d.size;
             }
             var p = Math.floor((receivedSize / file.size) * 100);
-            var progressId = "#PROG" + file.name.hashCode() + "PROG";
+			var ratioStr = Math.round(receivedSize/1024) + "KB / " + Math.round(file.size / 1024) + "KB"
+            var progressText = "#PROG" + fileIdHash + "TEXT";
+            var progressId = "#PROG" + fileIdHash + "PROG";
             trace("file download: " + p + "%");
-            $(progressId).attr('value', p)
+            $(progressText).attr('data-label', ratioStr)
+            $(progressId).css('width', p + "%")
             if (receivedSize === file.size) {
                 var received = new window.Blob(receiveBuffer, {
                     type: file.type
@@ -245,14 +249,21 @@ function handleChannelClient(channel) {
                 var href = URL.createObjectURL(received)
                 receiveBuffer = [];
                 receivedSize = 0;
-                var id = "#" + file.name.hashCode();
+                var id = "#" + fileIdHash;
                 $(id).text("download");
                 $(id).attr('href', href);
                 $(id).attr('download', file.name);
-                var idView = "#" + file.name.hashCode() + "VW";
+                var idView = "#" + fileIdHash + "VW";
                 $(idView).text("view");
                 $(idView).attr('href', href);
                 file = null;
+				receiveFile = false;
+				var next = queue.pop();
+				if (next) {
+					console.log("next: " + next.t.id);
+					requestFile(next.t, next.id);
+				}
+				
             }
         } else {
             msg = JSON.parse(evt.data);
@@ -261,9 +272,12 @@ function handleChannelClient(channel) {
                     var fileList = msg.data;
                     var htmlStr = "<ul>";
                     fileList.forEach(function(item) {
+						//var item = decodeURIComponent(i);
                         var i1 = btoa(item);
                         var i2 = btoa(item + ".blob");
-                        htmlStr += "<li><a id=" + item + " class='file-item' href=# onclick='requestFile(this,\"" + msg.uid + "\")'>" + item + "</a><progress id=PROG" + item.hashCode() + "PROG max='100' value='0'/>" +
+                        htmlStr += "<li><a id=" + item + " class='file-item' href=# onclick='requestFile(this,\"" + msg.uid + "\")'>" + decodeURIComponent(item) + 
+							"</a><div class='progress' data-label='' id=PROG" + item.hashCode() + "TEXT> <span class=value id=PROG" + item.hashCode() + "PROG style='width:0%;'></span> </div>" +
+                        //htmlStr += "<li><a id=" + item + " class='file-item' href=# onclick='requestFile(this,\"" + msg.uid + "\")'>" + decodeURIComponent(item) + "</a><progress id=PROG" + item.hashCode() + "PROG max='100' value='0' />" +
                             "<a class='file-item' target='_blank' href=# id=" + item.hashCode() + "></a>" +
                             "<a class='file-item' target='_blank' href=# id=" + item.hashCode() + "VW></a></li>";
 
@@ -282,9 +296,22 @@ function handleChannelClient(channel) {
     };
 }
 
+var progress = {};
+var receiveFile = false;
+var queue = [];
 
 function requestFile(t, peerId) {
+	if (progress[t.id]) return;
+	if (receiveFile) {
+        var progressText = "#PROG" + t.id.hashCode() + "TEXT";
+		queue.push({t: t, id: peerId});
+		trace("queued " + t.id);
+        $(progressText).attr('data-label', "Queued")
+		return;
+	}
     var fileName = t.id;
+	progress[t.id] = true;
+	receiveFile = true;
     console.log("peer" + peerId);
     var channel = peers[peerId]["channel"];
 
@@ -330,7 +357,7 @@ function sendChatMessage(msg) {
 
 function logError(error) {
     trace(error.name + ": " + error.message);
-    weblog("error", error.message);
+    weblog(error.message, "error");
 }
 
 function handleFileSelect(evt) {
