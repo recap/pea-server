@@ -71,11 +71,11 @@ ul {
 	var client = true;
 	var remote_peer_id = GetURLParameter('sessionId');
 	$( document ).ready(function() {
-		if (!isWebRTC) {
-			$('#warning').html("<h3>error: webRTC not supported!</h3>");
-			$('#warning').css('background-color', 'red');
-			return;
-		}
+		//if (!isWebRTC) {
+		//	$('#warning').html("<h3>error: webRTC not supported!</h3>");
+		//	$('#warning').css('background-color', 'red');
+		//	return;
+		//}
 		if ( (!isFirefox) && (!isChrome) && (!isOpera) ) {
 			$('#warning').html("<h3>warning: browser might not be supported!</h3>");
 			$('#warning').css('background-color', 'red');
