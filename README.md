@@ -24,19 +24,19 @@ server is used for signaling i.e. help both browsers setup their direct channel.
 ```shell
 git clone https://github.com/recap/pea-server.git
 cd pea-server 
-openssl req -x509 -newkey rsa:2048 -keyout keytmp.pem -out cert.pem -days 365 -nodes
 npm install
-node pea-server.js 8080 8585
+node pea-server.js 8080
 ```
 _goto http://127.0.0.1:8080_
 
 ### docker
 ```shell
-docker build -t pea-server .
-docker run --net=host pea-server /bin/sh
+make run
 ```
-__get certificates from [letsencrypt](https://letsencrypt.org/)__
+Get container IP
 ```shell
-node pea-server.js 80 443
+docker ps
+docker inspect [CONTAINER ID] | grep IPAddress
 ```
+_goto http://[CONTAINER IP]_
 
