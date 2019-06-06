@@ -192,15 +192,18 @@ function handleChannelServer(channel, peerId) {
         var msg = JSON.parse(evt.data);
         switch (msg.type) {
             case "file-list":
-                var fileArray = [];
+                var fileList = {};
                 Object.keys(fileHash).forEach(function(key) {
-                    fileArray.push(key);
+                    fileList[key] = {
+						size: fileHash[key].size,
+						name: key
+					}
                 });
                 weblog("file list requested by " + peerId);
                 channel.send(JSON.stringify({
                     "uid": userId,
                     "type": "file-list-rep",
-                    "data": fileArray
+                    "data": fileList
                 }));
                 break;
             case "file-request":
@@ -209,6 +212,31 @@ function handleChannelServer(channel, peerId) {
                 break;
         }
     };
+}
+
+function getSizeUnits(size) {
+		var units = null;
+		var s = size;
+		if (s < 1024) {
+			units = 'B'
+		}
+		if ((s < 1024*1024) && (!units)){
+			s = Math.round(s /1024)
+			units = 'KB'
+		}
+		if ((s < 1024*1024*1024) && (!units)) {
+			s = Math.round(s /(1024*1024))
+			units = 'MB'
+		}
+		if ((s < 1024*1024*1024*1024) && (!units)) {
+			s = Math.round(s /(1024*1024*1024))
+			units = 'GB'
+		}
+
+	return {
+		size: s,
+		units: units
+	}
 }
 
 function handleChannelClient(channel) {
@@ -236,7 +264,7 @@ function handleChannelClient(channel) {
                 receivedSize += d.size;
             }
             var p = Math.floor((receivedSize / file.size) * 100);
-			var ratioStr = Math.round(receivedSize/1024) + "KB / " + Math.round(file.size / 1024) + "KB"
+			var ratioStr = getSizeUnits(receivedSize).size + "" + getSizeUnits(receivedSize).units + " / " + getSizeUnits(file.size).size + "" + getSizeUnits(file.size).units
             var progressText = "#PROG" + fileIdHash + "TEXT";
             var progressId = "#PROG" + fileIdHash + "PROG";
             trace("file download: " + p + "%");
@@ -269,14 +297,18 @@ function handleChannelClient(channel) {
             msg = JSON.parse(evt.data);
             switch (msg.type) {
                 case "file-list-rep":
-                    var fileList = msg.data;
+                    var fileArray = Object.keys(msg.data);
+					var fileList = msg.data;
+					trace(fileHash);
+
                     var htmlStr = "<ul>";
-                    fileList.forEach(function(item) {
+                    fileArray.forEach(function(item) {
 						//var item = decodeURIComponent(i);
+						var fileSize = fileList[item].size;
                         var i1 = btoa(item);
                         var i2 = btoa(item + ".blob");
                         htmlStr += "<li><a id=" + item + " class='file-item' href=# onclick='requestFile(this,\"" + msg.uid + "\")'>" + decodeURIComponent(item) + 
-							"</a><div class='progress' data-label='' id=PROG" + item.hashCode() + "TEXT> <span class=value id=PROG" + item.hashCode() + "PROG style='width:0%;'></span> </div>" +
+							"</a><div class='progress' data-label='"+ getSizeUnits(fileSize).size +" " + getSizeUnits(fileSize).units +"' id=PROG" + item.hashCode() + "TEXT> <span class=value id=PROG" + item.hashCode() + "PROG style='width:0%;'></span> </div>" +
                         //htmlStr += "<li><a id=" + item + " class='file-item' href=# onclick='requestFile(this,\"" + msg.uid + "\")'>" + decodeURIComponent(item) + "</a><progress id=PROG" + item.hashCode() + "PROG max='100' value='0' />" +
                             "<a class='file-item' target='_blank' href=# id=" + item.hashCode() + "></a>" +
                             "<a class='file-item' target='_blank' href=# id=" + item.hashCode() + "VW></a></li>";
