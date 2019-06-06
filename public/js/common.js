@@ -15,7 +15,7 @@ var isIE = /*@cc_on!@*/false || !!document.documentMode;
 var isEdge = !isIE && !!window.StyleMedia;
 
 // Chrome 1 - 71
-var isChrome = (!!window.chrome && (!!window.chrome.webstore || !!window.chrome.runtime)) || (navigator.userAgent.toLowerCase().inexOf('chrome') != -1);
+var isChrome = (!!window.chrome && (!!window.chrome.webstore || !!window.chrome.runtime)) || (navigator.userAgent.toLowerCase().indexOf('chrome') != -1);
 
 // Blink engine detection
 var isBlink = (isChrome || isOpera) && !!window.CSS;
