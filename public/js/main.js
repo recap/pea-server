@@ -340,6 +340,9 @@ function sendData(fileName, channel) {
         reader.onload = (function() {
             return function(e) {
                 channel.send(e.target.result);
+				var progress = offset + e.target.result.byteLength;
+				var percentage = Math.round( (progress * 100) / file.size);
+				weblog(percentage + "% " + file.name +" sent " + Math.round(progress/1024) + "KB of " + Math.round(file.size/1024) +"KB");
                 if (file.size > offset + e.target.result.byteLength) {
                     window.setTimeout(sliceFile, 0, offset + chunkSize);
                 }
