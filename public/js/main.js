@@ -38,8 +38,12 @@ function listen(url) {
 	$('#qrcode').qrcode(serverUrl + '/' + userId);
 }
 
-function connect(uid) {
+var callbacks = {}
+
+
+function connect(uid, cb) {
     // get offer from remote peer with uid
+	callbacks[uid] = cb;
     socket.emit('webrtc-connection-req', JSON.stringify({
         "uid": userId,
         "ruid": uid
@@ -245,7 +249,10 @@ function handleChannelClient(channel) {
     var file = null;
     channel.onopen = function() {
         trace("channel open");
-        $('#banner').html("<h2>Connected to: " + remote_peer_id + "</h2><h3>File list:-</h3>");
+		var cb = callbacks[remote_peer_id];
+		if (cb) {
+			cb();
+		}
         channel.send(JSON.stringify({
             "uid": userId,
             "type": "file-list"

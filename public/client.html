@@ -71,29 +71,26 @@ ul {
 	var client = true;
 	var remote_peer_id = GetURLParameter('sessionId');
 	$( document ).ready(function() {
-		//if (!isWebRTC) {
-		//	$('#warning').html("<h3>error: webRTC not supported!</h3>");
-		//	$('#warning').css('background-color', 'red');
-		//	return;
-		//}
-		if ( (!isFirefox) && (!isChrome) && (!isOpera) ) {
-			$('#warning').html("<h3>warning: browser might not be supported!</h3>");
-			$('#warning').css('background-color', 'red');
-		}
-		if (!isChrome) {
-			$('#warning').html("<h3>warning: works best on Chrome especially for big files!</h3>");
-			$('#warning').css('background-color', 'red');
-		}
-
-		$("#banner").html("<h2>Connecting to: "+remote_peer_id+"</h2>");
-		connect(remote_peer_id);
+		connect(remote_peer_id, function() {
+			if ( (!isFirefox) && (!isChrome) && (!isOpera) ) {
+				$('#warning').html("<h3>warning: browser might not be supported!</h3>");
+				$('#warning').css('background-color', 'red');
+			}
+			if (!isChrome) {
+				$('#warning').html("<h3>warning: works best on Chrome especially for big files!</h3>");
+				$('#warning').css('background-color', 'red');
+			}
+			$('#banner').html("<h2>Connected to: " + remote_peer_id + "</h2><h3>File list:-</h3>");
+		});
 	});	
 </script>
 
 <body>
 	<div id="warning"></div>
 	<div id="banner"></div>
-	<div id="maindiv"></div>
+	<div id="maindiv">
+		<img src="connecting.gif" />
+	</div>
 </body>
 </html>
 
