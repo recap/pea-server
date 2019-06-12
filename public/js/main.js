@@ -285,7 +285,7 @@ function handleChannelClient(channel) {
                 receiveBuffer = [];
                 receivedSize = 0;
                 var id = "#" + fileIdHash;
-                $(id).text("download");
+                $(id).text("save");
                 $(id).attr('href', href);
                 $(id).attr('download', file.name);
                 var idView = "#" + fileIdHash + "VW";
