@@ -1,4 +1,3 @@
-// http://ejohn.org/blog/ecmascript-5-strict-mode-json-and-more/
 "use strict";
 
 const config = require('./config');
@@ -25,18 +24,22 @@ const maxCacheTime = 3600000;
 
 /**
  * run once a day at 2:17am
- *
  */
 cron.scheduleJob('17 2 * * *', function(){
 	getData(config.details);
 });
+
 getData(config.details);
 
 module.exports.startWebSocket = function(server) {
-	const io = websocket.listen(server);
+	const io = websocket(server);
 	io.on('connection', startSocketEvents);
 };
 
+
+/**
+ * internal house keeping. keep minimum state as possible.
+ */
 setInterval(() => {
 	const t2 = new Date().getTime();
 	const purgeIds = [];
@@ -60,23 +63,23 @@ setInterval(() => {
  * handle communication events between server and browser
  */
 function startSocketEvents(socket) {
-    socket.emit('connect', null);	
+	console.log("starting websocket.");
+    socket.emit('iconnect', null);	
 
 	socket.on('webrtc-register', function(data){
+		console.log('webrtc-register> ', data)
 		const jd = JSON.parse(data);
 		const uid = jd["uid"];
 		socks[uid] = socket;
 		timers[uid] = new Date().getTime();
-		//console.log(uid+" registerd.");
 	});
 	
 	socket.on('webrtc-connection-req', function(data){
-		//console.log(data)
+		console.log('webrtc-connection-req> ', data)
 		const jd = JSON.parse(data);
 		const uid = jd["uid"];
 		socks[uid] = socket;
 		timers[uid] = new Date().getTime();
-		//console.log(uid+" registerd.");
 		
 		if(jd.ruid in socks){
 		  const s = socks[jd.ruid];
@@ -86,11 +89,12 @@ function startSocketEvents(socket) {
 	});
 
     socket.on('details-req', function(data){
-        //console.log("details req");
+		console.log('details-req> ', data)
 		if(details != null)	socket.emit('details-res', JSON.stringify(details));
 	});
 
 	socket.on('webrtc-candidate', function(data){
+		console.log('webrtc-candidate> ', data)
 		const jd = JSON.parse(data);
 		const uid = jd["uid"]
 		const ruid = jd["ruid"];
@@ -109,14 +113,11 @@ function startSocketEvents(socket) {
 	});
 
 	socket.on('webrtc-dsp', function(data){
-		//console.log(JSON.stringify(data));
+		console.log('webrtc-dsp> ', data)
 		const jd = JSON.parse(data);
 		const uid = jd["uid"];
 		const ruid = jd["ruid"];
 		const dsp = jd["webrtc"];
-		//dsps[uid] = dsp;
-		//socks[uid] = socket;
-		//console.log(ruid);
 		if(ruid in socks){
 		  const s = socks[ruid];
 		  s.emit('webrtc-message', JSON.stringify({"uid" : ruid, "ruid": uid, "webrtc" : dsp}));
@@ -124,39 +125,27 @@ function startSocketEvents(socket) {
 	});
 	
 	socket.on('get-offer', function(data){
-	        const jd = JSON.parse(data);
+		console.log('get-offer> ', data)
+	    const jd = JSON.parse(data);
 		const ruid = jd["ruid"];	
 		if(ruid in dsps){
 			socket.emit('webrtc-message', JSON.stringify(dsps[ruid]));
-			//console.log(JSON.stringify(dsps[ruid]));
 		}
 		if(ruid in candidates){
 			candidates[ruid].forEach( function(val, index, array) {
 				if(val){
 					socket.emit('webrtc-message', JSON.stringify(val));
-					//console.log("CAND: "+JSON.stringify(val));
 				}
 			});	
 		}
-		//console.log(JSON.stringify(data));
 		
 	});
-	/*socket.on("answer", function(data){
-		console.log("ANSWER: "+JSON.stringify(data));
-		const jd = JSON.parse(data);
-		const ruid = jd["ruid"];
-		const dsp = jd["webrtc"];
-		const s = socks[ruid];
-		s.emit("webrtc-message", JSON.stringify(dsp));
-		
-	});*/
 }
 
 function getData(postDetails){
 		if(postDetails.host == null){
 			return null;
 		}
-		//console.log(JSON.stringify(postDetails));
         
 		const data = querystring.stringify(postDetails.data);
 
@@ -179,7 +168,6 @@ function getData(postDetails){
         const req = https.request(options, function(res) {
                 res.setEncoding('utf8');
                 res.on('data', function (chunk) {
- 						//console.log(chunk);
                         const jd = JSON.parse(chunk);
                         details = jd;
                 });
@@ -188,11 +176,3 @@ function getData(postDetails){
         req.write(data);
         req.end();
 }
-
-
-
-
-
-
-
-

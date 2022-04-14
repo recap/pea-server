@@ -1,8 +1,11 @@
 .PHONY: build
 
 build:
-	docker build -t recap/pea-server:v0.1 .
+	docker build -t recap/pea-server .
 
 run: build
-	docker run -d recap/pea-server:v0.1
+	docker run -d recap/pea-server
+
+push: 
+	docker push recap/pea-server
 
