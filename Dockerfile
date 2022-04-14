@@ -1,4 +1,4 @@
-FROM alpine/node
+FROM node:16.14-alpine
 
 MAINTAINER Reggie Cushing
 
