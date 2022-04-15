@@ -1,7 +1,5 @@
 'use strict';
 
-var receivedSize = 0;
-var bytesToSend = 0;
 var configuration = {
     iceServers: [{
         urls: ["stun:stun.l.google.com:19302"]
@@ -12,11 +10,7 @@ var userId = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 7);
 var serverUrl = "http://" + location.host;
 var fileHash = {};
 var socket = io.connect();
-var pc = null;
 var peers = {};
-var peer = null;
-var lastPeerId = null;
-var conn = null;
 var callbacks = {}
 
 /*
