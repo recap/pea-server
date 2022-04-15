@@ -8,7 +8,6 @@ const https = require('https');
 /**
  * global variables
  */
-let  details = null;
 const ev = new events.EventEmitter();
 // track ICE DSP offers/answers
 const dsps = {}
@@ -57,75 +56,102 @@ function startSocketEvents(socket) {
 
 	socket.on('webrtc-register', function(data){
 		console.log('webrtc-register> ', data)
-		const jd = JSON.parse(data);
-		const uid = jd["uid"];
-		socks[uid] = socket;
-		timers[uid] = new Date().getTime();
+		try {
+			const jd = JSON.parse(data);
+			const uid = jd["uid"];
+			socks[uid] = socket;
+			timers[uid] = new Date().getTime();
+		} catch(err) {
+			console.log('error> ', err);
+			socket.emit('error', err);
+		}
 	});
 	
 	socket.on('webrtc-connection-req', function(data){
 		console.log('webrtc-connection-req> ', data)
-		const jd = JSON.parse(data);
-		const uid = jd["uid"];
-		socks[uid] = socket;
-		timers[uid] = new Date().getTime();
+		try{
+			const jd = JSON.parse(data);
+			const uid = jd["uid"];
+			socks[uid] = socket;
+			timers[uid] = new Date().getTime();
 		
-		if(jd.ruid in socks){
-		  const s = socks[jd.ruid];
-		  s.emit("webrtc-connection", data);
+			// check if remote peer has an open web socket with server.
+			if(jd.ruid in socks){
+			  const s = socks[jd.ruid];
+			  s.emit("webrtc-connection", data);
+			} else {
+				throw new Error(`Peer ${jd.ruid} not found!`);
+			}
+		} catch(err) {
+			console.log('error> ', err);
+			socket.emit('error', err);
 		}
 		
 	});
 
-    socket.on('details-req', function(data){
-		console.log('details-req> ', data)
-		if(details != null)	socket.emit('details-res', JSON.stringify(details));
-	});
-
 	socket.on('webrtc-candidate', function(data){
 		console.log('webrtc-candidate> ', data)
-		const jd = JSON.parse(data);
-		const uid = jd["uid"]
-		const ruid = jd["ruid"];
-		const cand = jd["candidate"];
-		if (ruid in socks) {
-			const s = socks[ruid];
-			s.emit("webrtc-message", JSON.stringify({
-				"uid": ruid,
-				"ruid": uid,
-				"webrtc": {
-					"type" : "candidate",
-					"candidate": cand
-				}
-			}));
+		try{
+			const jd = JSON.parse(data);
+			const uid = jd["uid"]
+			const ruid = jd["ruid"];
+			const cand = jd["candidate"];
+			if (ruid in socks) {
+				const s = socks[ruid];
+				s.emit("webrtc-message", JSON.stringify({
+					"uid": ruid,
+					"ruid": uid,
+					"webrtc": {
+						"type" : "candidate",
+						"candidate": cand
+					}
+				}));
+			} else {
+				throw new Error(`Peer ${ruid} not found!`);
+			}
+		} catch(err) {
+			console.log('error> ', err);
+			socket.emit('error', err);
 		}
 	});
 
 	socket.on('webrtc-dsp', function(data){
 		console.log('webrtc-dsp> ', data)
-		const jd = JSON.parse(data);
-		const uid = jd["uid"];
-		const ruid = jd["ruid"];
-		const dsp = jd["webrtc"];
-		if(ruid in socks){
-		  const s = socks[ruid];
-		  s.emit('webrtc-message', JSON.stringify({"uid" : ruid, "ruid": uid, "webrtc" : dsp}));
+		try{
+			const jd = JSON.parse(data);
+			const uid = jd["uid"];
+			const ruid = jd["ruid"];
+			const dsp = jd["webrtc"];
+			if(ruid in socks){
+			  const s = socks[ruid];
+			  s.emit('webrtc-message', JSON.stringify({"uid" : ruid, "ruid": uid, "webrtc" : dsp}));
+			} else {
+				throw new Error(`Peer ${ruid} not found!`);
+			}
+		} catch(err) {
+			console.log('error> ', err);
+			socket.emit('error', err);
 		}
 	});
 	
 	socket.on('get-offer', function(data){
 		console.log('get-offer> ', data)
-	    const jd = JSON.parse(data);
-		const ruid = jd["ruid"];	
-		if(ruid in dsps){
-			socket.emit('webrtc-message', JSON.stringify(dsps[ruid]));
-		}
-		if(ruid in candidates){
-			candidates[ruid].forEach( function(val, index, array) {
-				if(val){
-					socket.emit('webrtc-message', JSON.stringify(val));
-				}
-			});	
+		try{
+			const jd = JSON.parse(data);
+			const ruid = jd["ruid"];	
+			if(ruid in dsps){
+				socket.emit('webrtc-message', JSON.stringify(dsps[ruid]));
+			}
+			if(ruid in candidates){
+				candidates[ruid].forEach( function(val, index, array) {
+					if(val){
+						socket.emit('webrtc-message', JSON.stringify(val));
+					}
+				});	
+			}
+		} catch(err) {
+			console.log('error> ', err);
+			socket.emit('error', err);
 		}
 		
 	});
