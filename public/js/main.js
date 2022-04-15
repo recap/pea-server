@@ -1,3 +1,4 @@
+/*global weblog, trace, io*/
 'use strict';
 
 var configuration = {
@@ -143,7 +144,7 @@ socket.on('webrtc-message', function(data) {
                 "pc": pc,
                 "channel": channel
             };
-            handleChannelClient(channel);
+            handleChannelClient(channel, ruid);
         }
     }
     if (message.type) {
@@ -156,8 +157,8 @@ socket.on('webrtc-message', function(data) {
         // if we get an offer, we need to reply with an answer
         if (message.type == "offer") {
             trace("received offer: " + JSON.stringify(message));
-            var desc = new RTCSessionDescription(message);
-            pc.setRemoteDescription(desc).then(function() {
+            var descOffer = new RTCSessionDescription(message);
+            pc.setRemoteDescription(descOffer).then(function() {
                     return pc.createAnswer();
                 })
                 .then(function(answer) {
@@ -186,8 +187,8 @@ socket.on('webrtc-message', function(data) {
                 .catch(logError);
         }
         if (message.type == "answer") {
-            var desc = new RTCSessionDescription(message);
-            pc.setRemoteDescription(desc).catch(logError);
+            var descAnswer = new RTCSessionDescription(message);
+            pc.setRemoteDescription(descAnswer).catch(logError);
         }
     }
 });
@@ -265,14 +266,15 @@ function getSizeUnits(size) {
 /*
  * Handle client side logic.
  */
-function handleChannelClient(channel) {
+function handleChannelClient(channel, ruid) {
     var receiveBuffer = [];
     var receivedSize = 0;
     var file = null;
 
     channel.onopen = function() {
         trace("channel open");
-		var cb = callbacks[remote_peer_id];
+		//var cb = callbacks[remote_peer_id];
+		var cb = callbacks[ruid];
 		if (cb) {
 			cb();
 		}
@@ -336,8 +338,8 @@ function handleChannelClient(channel) {
                     fileArray.forEach(function(item) {
 						//var item = decodeURIComponent(i);
 						var fileSize = fileList[item].size;
-                        var i1 = btoa(item);
-                        var i2 = btoa(item + ".blob");
+                        //var i1 = btoa(item);
+                        //var i2 = btoa(item + ".blob");
                         htmlStr += "<li><a id=" + item + " class='file-item' href=# onclick='requestFile(this,\"" + msg.uid + "\")'>" + decodeURIComponent(item) + 
 							"</a><div class='progress' data-label='"+ getSizeUnits(fileSize).size +" " + getSizeUnits(fileSize).units +"' id=PROG" + item.hashCode() + "TEXT> <span class=value id=PROG" + item.hashCode() + "PROG style='width:0%;'></span> </div>" +
                             "<a class='file-item' target='_blank' href=# id=" + item.hashCode() + "></a>" +
@@ -441,14 +443,12 @@ function logError(error) {
  * UI file select handler.
  */
 function handleFileSelect(evt) {
-    var files = evt.target.files; // FileList object
+    var files = Array.from(evt.target.files); // FileList object
 
-    // files is a FileList of File objects. List some properties.
-    var output = [];
-    for (var i = 0, f; f = files[i]; i++) {
-        fileHash[escape(f.name)] = f;
-        weblog("added: " + escape(f.name));
-    }
+	files.forEach(function(f) {
+		fileHash[escape(f.name)] = f;
+		weblog(`added file: ${escape(f.name)}.`);
+	})
 
     $('#start').attr('disabled', false);
 }
