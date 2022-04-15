@@ -1,14 +1,10 @@
 "use strict";
 
 const websocket = require('socket.io');
-const cron = require('node-schedule');
-const events = require('events');
-const https = require('https');
 
 /**
  * global variables
  */
-const ev = new events.EventEmitter();
 // track ICE DSP offers/answers
 const dsps = {}
 // track ICE candidates
@@ -77,8 +73,8 @@ function startSocketEvents(socket) {
 		
 			// check if remote peer has an open web socket with server.
 			if(jd.ruid in socks){
-			  const s = socks[jd.ruid];
-			  s.emit("webrtc-connection", data);
+				const s = socks[jd.ruid];
+				s.emit("webrtc-connection", data);
 			} else {
 				throw new Error(`Peer ${jd.ruid} not found!`);
 			}
@@ -123,8 +119,8 @@ function startSocketEvents(socket) {
 			const ruid = jd["ruid"];
 			const dsp = jd["webrtc"];
 			if(ruid in socks){
-			  const s = socks[ruid];
-			  s.emit('webrtc-message', JSON.stringify({"uid" : ruid, "ruid": uid, "webrtc" : dsp}));
+				const s = socks[ruid];
+				s.emit('webrtc-message', JSON.stringify({"uid" : ruid, "ruid": uid, "webrtc" : dsp}));
 			} else {
 				throw new Error(`Peer ${ruid} not found!`);
 			}
@@ -143,7 +139,7 @@ function startSocketEvents(socket) {
 				socket.emit('webrtc-message', JSON.stringify(dsps[ruid]));
 			}
 			if(ruid in candidates){
-				candidates[ruid].forEach( function(val, index, array) {
+				candidates[ruid].forEach( function(val) {
 					if(val){
 						socket.emit('webrtc-message', JSON.stringify(val));
 					}

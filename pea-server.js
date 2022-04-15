@@ -4,8 +4,6 @@
 process.title = 'pea-server';
 const http = require('http');
 const express = require('express');
-const fs = require('fs');
-const serveStatic = require('serve-static');
 const randezvous = require('./src/randezvous');
 
 
