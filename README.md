@@ -10,7 +10,7 @@ Public randezvous server at [dataplane.io](https://dataplane.io).
 
 ## Cons:
 - Browser has to remain open while transfers are taking place.
-- Files larges than 400MB might be problematic.
+- Not yet suitable for large files.
 - Not suitable for permanent file server.
 
 ## How it works
@@ -31,6 +31,7 @@ _goto http://127.0.0.1:8080_
 
 ### docker
 ```shell
+make buid
 make run
 ```
 Get container IP
