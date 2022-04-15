@@ -1,10 +1,8 @@
 "use strict";
 
-const config = require('./config');
 const websocket = require('socket.io');
 const cron = require('node-schedule');
 const events = require('events');
-const querystring = require('querystring');
 const https = require('https');
 
 /**
@@ -21,15 +19,6 @@ const socks = {};
 const timers = {};
 // 1 hr cache time;
 const maxCacheTime = 3600000; 
-
-/**
- * run once a day at 2:17am
- */
-cron.scheduleJob('17 2 * * *', function(){
-	getData(config.details);
-});
-
-getData(config.details);
 
 module.exports.startWebSocket = function(server) {
 	const io = websocket(server);
@@ -140,39 +129,4 @@ function startSocketEvents(socket) {
 		}
 		
 	});
-}
-
-function getData(postDetails){
-		if(postDetails.host == null){
-			return null;
-		}
-        
-		const data = querystring.stringify(postDetails.data);
-
-        const options = {
-                host: postDetails.host,
-                port: postDetails.port,
-                path: postDetails.path,
-                method: 'POST',
-                headers: {
-                        'User-Agent': postDetails.useragent,
-                        'origin' : postDetails.origin,
-                        'Referer' : postDetails.referer,
-                        'DNT' : postDetails.dnt,
-                        'Accept' : postDetails.accept,
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        'Content-Length': Buffer.byteLength(data)
-                }
-        }
-
-        const req = https.request(options, function(res) {
-                res.setEncoding('utf8');
-                res.on('data', function (chunk) {
-                        const jd = JSON.parse(chunk);
-                        details = jd;
-                });
-        });
-
-        req.write(data);
-        req.end();
 }
