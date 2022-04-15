@@ -122,19 +122,14 @@ socket.on('webrtc-connection', function(data) {
  * Initial web socket connection.
  */
 socket.on('iconnect', function() {
-	console.log("connected");
-    socket.emit('details-req', "");
+	console.log("websocket connected.");
 });
 
 /*
- * Receive config from server
+ * ICE connection handshake takes sever steps. 
+ * Peers exchange offers and answers of their candidate lists.
+ * Candidates are endpoint connections IP and port.
  */
-socket.on('details-res', function(data) {
-    trace('config: ' + data);
-    var jd = JSON.parse(data);
-    configuration = jd;
-});
-
 socket.on('webrtc-message', function(data) {
     var jd = JSON.parse(data);
     var ruid = jd.ruid;
@@ -159,6 +154,7 @@ socket.on('webrtc-message', function(data) {
     }
     if (message.type) {
         if (message.type == "candidate") {
+			// remote peer sends new ICE candidate. This get added locally to the peer description.
             var candidate = new RTCIceCandidate(message.candidate);
             pc.addIceCandidate(candidate).catch(logError);
             trace("receiveed candidate: " + JSON.stringify(candidate));
@@ -204,6 +200,8 @@ socket.on('webrtc-message', function(data) {
 
 /*
  * Peer to peer communication, server not involved from here on.
+ * After handshake a channel is opened directly between peers.
+ * We use this channel to transfer a file.
  */
 function handleChannelServer(channel, peerId) {
     channel.onopen = function() {
