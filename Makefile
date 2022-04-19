@@ -6,6 +6,3 @@ build:
 run: build
 	docker run -d recap/pea-server
 
-push: 
-	docker push recap/pea-server
-
