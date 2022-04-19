@@ -50,6 +50,7 @@ function startSocketEvents(socket) {
 	console.log("starting websocket.");
     socket.emit('iconnect', null);	
 
+	// new browser client registers uid
 	socket.on('webrtc-register', function(data){
 		console.log('webrtc-register> ', data)
 		try {
@@ -63,6 +64,8 @@ function startSocketEvents(socket) {
 		}
 	});
 	
+	// initialize a peer 2 peer request to exchange 
+	// endpoints between peers.
 	socket.on('webrtc-connection-req', function(data){
 		console.log('webrtc-connection-req> ', data)
 		try{
@@ -85,6 +88,8 @@ function startSocketEvents(socket) {
 		
 	});
 
+	// peer sends updated local endpoints (ip, port)
+	// to be sent to other peers 
 	socket.on('webrtc-candidate', function(data){
 		console.log('webrtc-candidate> ', data)
 		try{
@@ -111,6 +116,8 @@ function startSocketEvents(socket) {
 		}
 	});
 
+	// peer sends offer (list of endpoints) and send it to 
+	// remote peer
 	socket.on('webrtc-dsp', function(data){
 		console.log('webrtc-dsp> ', data)
 		try{
@@ -130,7 +137,8 @@ function startSocketEvents(socket) {
 		}
 	});
 	
-	socket.on('get-offer', function(data){
+	// TODO delete
+	/*socket.on('get-offer', function(data){
 		console.log('get-offer> ', data)
 		try{
 			const jd = JSON.parse(data);
@@ -150,5 +158,5 @@ function startSocketEvents(socket) {
 			socket.emit('error', err);
 		}
 		
-	});
+	});*/
 }
