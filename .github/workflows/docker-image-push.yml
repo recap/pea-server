@@ -13,7 +13,7 @@ jobs:
     steps:  
       - shell: bash
         env:
-            TEST_USER: ${{ secrets.DCOKER_USERNAME }}
+            TEST_USER: ${{ secrets.DOCKER_USERNAME }}
         run: echo "$TEST_USER"
 
       - uses: actions/checkout@v2
