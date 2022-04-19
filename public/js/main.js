@@ -7,54 +7,33 @@ var configuration = {
     }]
 };
 
-var userId = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 7);
-var serverUrl = "http://" + location.host;
+//var userId = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 7);
+//var serverUrl = "http://" + location.host;
 var fileHash = {};
 var socket = io.connect();
 var peers = {};
 var callbacks = {}
 
 /*
- * Initialize the UI and start server
+ * Register new user id on signal server.
+ * This allows other peers to find us.
  */
-function init() {
-    $('#id').val(userId);
-    $('#start').attr('disabled', true);
-	$('#log').toggle();
-	var e = new EventEmitter();
-	e.on('test', function(d,t) {
-		console.log(`test called with ${d} and ${t}.`)
-	})
-	e.emit('test', 12, "Sdsd");
-	listen();
-}
-
-/*
- * Listen: register uid to signal server
- */
-function listen(url) {
-    if (!(url)) {
-        url = serverUrl
-    }
+events.on('init', function(uid, serverUrl) {
+	// register new user with signal server
     socket.emit('webrtc-register', JSON.stringify({
-        "uid": userId
+        "uid": uid
     }));
-    weblog("started file server at " + serverUrl + "/" + userId);
-	$("#url").html("<p>" + serverUrl + '/' +userId + "</p>");
-    $('#id').attr('disabled', true);
-    $('#start').attr('disabled', true);
-	$('#qrcode').qrcode(serverUrl + '/' + userId);
-}
+})
 
 
 /*
  * Client to server connection request through signal server.
  */
-function connect(uid, cb) {
-	callbacks[uid] = cb;
+function connect(myId, remoteId, cb) {
+	callbacks[remoteId] = cb;
     socket.emit('webrtc-connection-req', JSON.stringify({
-        "uid": userId,
-        "ruid": uid
+        "uid": myId,
+        "ruid": remoteId
     }));
 }
 
@@ -301,29 +280,19 @@ function handleChannelClient(channel, ruid) {
             } else {
                 receivedSize += d.size;
             }
-            var p = Math.floor((receivedSize / file.size) * 100);
-			var ratioStr = getSizeUnits(receivedSize).size + "" + getSizeUnits(receivedSize).units + " / " + getSizeUnits(file.size).size + "" + getSizeUnits(file.size).units
-            var progressText = "#PROG" + fileIdHash + "TEXT";
-            var progressId = "#PROG" + fileIdHash + "PROG";
-            trace("file download: " + p + "%");
-            $(progressText).attr('data-label', ratioStr)
-            $(progressId).css('width', p + "%")
+			trace(`downloading: ${encodeURIComponent(file.name)} idHash: ${fileIdHash}.`);
+			events.emit('fileDownloadProgress', fileIdHash, receivedSize, file.size);
             if (receivedSize === file.size) {
                 var received = new window.Blob(receiveBuffer, {
                     type: file.type
                 });
                 var href = URL.createObjectURL(received)
+				events.emit('fileDownload', fileIdHash, file.name, href);
                 receiveBuffer = [];
                 receivedSize = 0;
-                var id = "#" + fileIdHash;
-                $(id).text("save");
-                $(id).attr('href', href);
-                $(id).attr('download', file.name);
-                var idView = "#" + fileIdHash + "VW";
-                $(idView).text("view");
-                $(idView).attr('href', href);
                 file = null;
 				receiveFile = false;
+				// download next in queue
 				var next = queue.pop();
 				if (next) {
 					console.log("next: " + next.t.id);
@@ -335,24 +304,7 @@ function handleChannelClient(channel, ruid) {
             msg = JSON.parse(evt.data);
             switch (msg.type) {
                 case "file-list-rep":
-                    var fileArray = Object.keys(msg.data);
-					var fileList = msg.data;
-					trace(fileHash);
-
-                    var htmlStr = "<ul>";
-                    fileArray.forEach(function(item) {
-						//var item = decodeURIComponent(i);
-						var fileSize = fileList[item].size;
-                        //var i1 = btoa(item);
-                        //var i2 = btoa(item + ".blob");
-                        htmlStr += "<li><a id=" + item + " class='file-item' href=# onclick='requestFile(this,\"" + msg.uid + "\")'>" + decodeURIComponent(item) + 
-							"</a><div class='progress' data-label='"+ getSizeUnits(fileSize).size +" " + getSizeUnits(fileSize).units +"' id=PROG" + item.hashCode() + "TEXT> <span class=value id=PROG" + item.hashCode() + "PROG style='width:0%;'></span> </div>" +
-                            "<a class='file-item' target='_blank' href=# id=" + item.hashCode() + "></a>" +
-                            "<a class='file-item' target='_blank' href=# id=" + item.hashCode() + "VW></a></li>";
-
-                    });
-                    htmlStr += "</ul>";
-                    $("#maindiv").html(htmlStr);
+					events.emit('fileListReceived', msg.uid, msg.data);
                     break;
                 case "file-rep":
                     file = msg.data;

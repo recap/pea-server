@@ -1,4 +1,4 @@
-var isDebug = false;
+var isDebug = true;
 // Opera 8.0+
 var isOpera = (!!window.opr && !!opr.addons) || !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
 
@@ -67,3 +67,19 @@ var isWebRTC = function() {
      }
      $('#log').append('[' + type + '] ' + message + '\n');
  }
+
+jQuery.fn.selectText = function(){
+   var doc = document;
+   var element = this[0];
+   if (doc.body.createTextRange) {
+	   var range = document.body.createTextRange();
+	   range.moveToElementText(element);
+	   range.select();
+   } else if (window.getSelection) {
+	   var selection = window.getSelection();        
+	   var range = document.createRange();
+	   range.selectNodeContents(element);
+	   selection.removeAllRanges();
+	   selection.addRange(range);
+   }
+};	
