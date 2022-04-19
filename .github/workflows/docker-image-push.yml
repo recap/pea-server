@@ -11,11 +11,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:  
-      - shell: bash
-        env:
-            TEST_USER: ${{ secrets.DOCKER_USERNAME }}
-        run: echo "$TEST_USER"
-
       - uses: actions/checkout@v2
         name: Check out code
 
