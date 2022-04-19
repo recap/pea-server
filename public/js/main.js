@@ -397,15 +397,12 @@ function logError(error) {
 }
 
 /*
- * UI file select handler.
+ * Add files
  */
-function handleFileSelect(evt) {
-    var files = Array.from(evt.target.files); // FileList object
 
+events.on('addedFiles', function(files) {
 	files.forEach(function(f) {
 		fileHash[escape(f.name)] = f;
 		weblog(`added file: ${escape(f.name)}.`);
 	})
-
-    $('#start').attr('disabled', false);
-}
+})

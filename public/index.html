@@ -49,19 +49,21 @@ html, body{
 }
 </style>
 
+
 <script src="/3rdparty/jquery-1.7.1.min.js"></script>
 <script src="/3rdparty/jquery.qrcode.min.js"></script>
 <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
 <script src="/socket.io/socket.io.js"></script>
+
 <script src="/js/common.js"></script>
 <script src="/js/eventemitter.js"></script>
+<script>
+	var events = new EventEmitter();
+	var userId = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 7);
+	var serverUrl = "http://" + location.host;
+</script>
+<script src="/js/main.js"></script>
 <body>
-
-<!--<div class="w3-container w3-black">
-	<p class="w3-large">WebRTC FTP</p>
-</div>-->
-
-
 
 <div class="w3-container w3-center">
 	<input id="id" type="hidden" class="w3-input"></input>
@@ -117,10 +119,6 @@ html, body{
 
 </body>
 <script>
-	var events = new EventEmitter();
-	var userId = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 7);
-	var serverUrl = "http://" + location.host;
-
 	// register for events needing UI updates
 	events.on('init', function(uid, serverUrl) {
 	  $('#id').val(uid);
@@ -137,6 +135,12 @@ html, body{
 	// end events
 
 	$( document ).ready(function() {
+		function handleFileSelect(evt) {
+			var files = Array.from(evt.target.files); // FileList object
+			events.emit('addedFiles', files);
+			$('#start').attr('disabled', false);
+		}
+
 		document.getElementById('btn_log').addEventListener('click', function(){$('#log').toggle(); $('#qrcode').toggle();}, false);
 		document.getElementById('copy').addEventListener('click', function(){
 				$('#url').selectText();
@@ -153,6 +157,5 @@ html, body{
 	});
 	
 </script>
-<script src="/js/main.js"></script>
 </html>
 
