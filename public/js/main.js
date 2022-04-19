@@ -21,6 +21,11 @@ function init() {
     $('#id').val(userId);
     $('#start').attr('disabled', true);
 	$('#log').toggle();
+	var e = new EventEmitter();
+	e.on('test', function(d,t) {
+		console.log(`test called with ${d} and ${t}.`)
+	})
+	e.emit('test', 12, "Sdsd");
 	listen();
 }
 
