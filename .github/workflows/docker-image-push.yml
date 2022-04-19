@@ -10,12 +10,14 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    steps:   
+    steps:  
+      - shell: bash
+        env:
+            TEST_USER: ${{ secrets.DCOKER_USERNAME }}
+        run: echo "$TEST_USER"
+
       - uses: actions/checkout@v2
         name: Check out code
-
-      - run: echo ${{ secrets.DOCKER_USERNAME }}
-      - run: echo ${{ secrets.DOCKER_PASSWORD }}
 
       - uses: mr-smithers-excellent/docker-build-push@v5
         name: Build & push Docker image
