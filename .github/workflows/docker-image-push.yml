@@ -19,7 +19,7 @@ jobs:
         with:
           image: recap/pea-server
           tags: latest
-          registry: null
+          registry: docker.io
           dockerfile: Dockerfile
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
