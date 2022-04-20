@@ -1,5 +1,5 @@
 /*global opr, safari*/
-var isDebug = true;
+var isDebug = false;
 // Opera 8.0+
 // eslint-disable-next-line no-unused-vars
 var isOpera = (!!window.opr && !!opr.addons) || !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
