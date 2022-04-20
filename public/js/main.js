@@ -63,8 +63,18 @@ socket.on('webrtc-connection', function(data) {
                 "ruid": peerId,
                 "candidate": evt.candidate
             }));
-            var candidate = new RTCIceCandidate(evt.candidate);
-            pc.addIceCandidate(candidate).catch(logError);
+
+
+			//TODO: this might not be needed check and delete!
+			/*var interval = setInterval(function(){
+				if(pc.currentRemoteDescription){
+					var candidate = new RTCIceCandidate(evt.candidate);
+					// hack around to fix ufrag errors
+					evt.candidate.usernameFragment = null;
+					pc.addIceCandidate(candidate).catch(logError);
+					clearInterval(interval);
+				}
+			});*/
         }
     };
 
@@ -133,9 +143,16 @@ socket.on('webrtc-message', function(data) {
     if (message.type) {
         if (message.type == "candidate") {
 			// remote peer sends new ICE candidate. This get added locally to the peer description.
-            var candidate = new RTCIceCandidate(message.candidate);
-            pc.addIceCandidate(candidate).catch(logError);
-            trace(`receiveed candidate: ${JSON.stringify(candidate)}`);
+			var interval = setInterval(function(){
+				if(pc.currentRemoteDescription){
+					// deal with out of order messages.
+					// first an offer needs to be received.
+					var candidate = new RTCIceCandidate(message.candidate);
+					pc.addIceCandidate(candidate).catch(logError);
+					trace(`receiveed candidate: ${JSON.stringify(candidate)}`);
+					clearInterval(interval);
+				}
+			}, 100);
         }
         // if we get an offer, we need to reply with an answer
         if (message.type == "offer") {
@@ -390,9 +407,8 @@ function sendData(fileName, channel) {
  * Error logging wrapper
  */
 function logError(error) {
-
-    trace(`ERROR in ${logError.caller()}: ${error.name} : ${error.message}.`);
     weblog(error.message, "error");
+	throw new Error(error);
 }
 
 /*
