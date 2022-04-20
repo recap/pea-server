@@ -15,7 +15,7 @@ jobs:
           - run: npm install
           - uses: sibiraj-s/action-eslint@v2
             with:
-              eslint-args: '--ignore-path=.gitignore --quiet'
+              eslint-args: '--ignore-path=node_modules --ignore-path=3rdparty --quiet'
               extensions: 'js,jsx,ts,tsx'
               annotations: true
 
