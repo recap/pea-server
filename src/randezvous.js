@@ -5,10 +5,6 @@ const websocket = require('socket.io');
 /**
  * global variables
  */
-// track ICE DSP offers/answers
-const dsps = {}
-// track ICE candidates
-const candidates = {}
 // track websocket open sockets
 const socks = {};
 const timers = {};

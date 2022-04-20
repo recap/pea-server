@@ -1,4 +1,4 @@
-/*global weblog, trace, io*/
+/*global weblog, trace, io, userId, events*/
 'use strict';
 
 var configuration = {
@@ -7,8 +7,6 @@ var configuration = {
     }]
 };
 
-//var userId = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 7);
-//var serverUrl = "http://" + location.host;
 var fileHash = {};
 var socket = io.connect();
 var peers = {};
@@ -18,7 +16,7 @@ var callbacks = {}
  * Register new user id on signal server.
  * This allows other peers to find us.
  */
-events.on('init', function(uid, serverUrl) {
+events.on('init', function(uid) {
 	// register new user with signal server
     socket.emit('webrtc-register', JSON.stringify({
         "uid": uid
@@ -29,6 +27,7 @@ events.on('init', function(uid, serverUrl) {
 /*
  * Client to server connection request through signal server.
  */
+// eslint-disable-next-line no-unused-vars
 function connect(myId, remoteId, cb) {
 	callbacks[remoteId] = cb;
     socket.emit('webrtc-connection-req', JSON.stringify({
@@ -235,33 +234,6 @@ function handleChannelServer(channel, peerId) {
     };
 }
 
-/*
- * Helper function to get file size.
- */
-function getSizeUnits(size) {
-		var units = null;
-		var s = size;
-		if (s < 1024) {
-			units = 'B'
-		}
-		if ((s < 1024*1024) && (!units)){
-			s = Math.round(s /1024)
-			units = 'KB'
-		}
-		if ((s < 1024*1024*1024) && (!units)) {
-			s = Math.round(s /(1024*1024))
-			units = 'MB'
-		}
-		if ((s < 1024*1024*1024*1024) && (!units)) {
-			s = Math.round(s /(1024*1024*1024))
-			units = 'GB'
-		}
-
-	return {
-		size: s,
-		units: units
-	}
-}
 
 /*
  * Handle client side logic.
