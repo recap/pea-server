@@ -32,16 +32,15 @@ var isWebRTC = function() {
 	}
 
 	if(prefix == 'moz' || prefix == 'webkit' && version > 41){
-	  console.log("Browser Support WebRTC")
+	  trace("Browser Support WebRTC")
 	  return true;
 	} else {
-	  console.log("This Browser Not Support WebRTC")
+	  trace("This Browser Not Support WebRTC")
 	  return false;
 	}
 }();
 
 
-/* exported trace */
 
  String.prototype.hashCode = function() {
      var hash = 0;
@@ -54,19 +53,21 @@ var isWebRTC = function() {
      return hash;
  }
 
- // Logging utility function.
- function trace(arg) {
-	 if (!isDebug) return;
-     var now = (window.performance.now() / 1000).toFixed(3);
-     console.log(now + ': ', arg);
- }
+// Logging utility function.
+function trace(s) {
+	if (!isDebug) {
+		return;
+	}
+	var now = (window.performance.now() / 1000).toFixed(3);
+	console.log(now + ': ', s);
+}
 
- function weblog(message, type) {
-     if (type == undefined) {
-         type = "info";
-     }
-     $('#log').append('[' + type + '] ' + message + '\n');
- }
+function weblog(message, type) {
+	if (type == undefined) {
+		type = "info";
+	}
+	$('#log').append('[' + type + '] ' + message + '\n');
+}
 
 jQuery.fn.selectText = function(){
    var doc = document;
@@ -83,3 +84,31 @@ jQuery.fn.selectText = function(){
 	   selection.addRange(range);
    }
 };	
+
+/*
+ * Helper function to get file size.
+ */
+function getSizeUnits(size) {
+		var units = null;
+		var s = size;
+		if (s < 1024) {
+			units = 'B'
+		}
+		if ((s < 1024*1024) && (!units)){
+			s = Math.round(s /1024)
+			units = 'KB'
+		}
+		if ((s < 1024*1024*1024) && (!units)) {
+			s = Math.round(s /(1024*1024))
+			units = 'MB'
+		}
+		if ((s < 1024*1024*1024*1024) && (!units)) {
+			s = Math.round(s /(1024*1024*1024))
+			units = 'GB'
+		}
+
+	return {
+		size: s,
+		units: units
+	}
+}

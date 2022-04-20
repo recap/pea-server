@@ -41,7 +41,7 @@ function connect(myId, remoteId, cb) {
  * Remote peer asking to open data channel through signal server.
  */
 socket.on('webrtc-connection', function(data) {
-    console.log('webrtc-connection> ', data);
+    trace(`webrtc-connection> ${data}`);
     var jd = JSON.parse(data);
     var peerId = jd["uid"];
     weblog("connection request from " + peerId);
@@ -56,8 +56,8 @@ socket.on('webrtc-connection', function(data) {
     pc.onicecandidate = function(evt) {
         // what to do with a new candidate
         if (evt.candidate) {
-			console.log('icecandidate> ', evt.candidate);
-            trace("pc.onicecandidate: " + JSON.stringify(evt.candidate));
+			trace(`icecandidate> ${evt.candidate}`);
+            trace(`pc.onicecandidate: ${JSON.stringify(evt.candidate)}`);
             socket.emit("webrtc-candidate", JSON.stringify({
                 "uid": userId,
                 "ruid": peerId,
@@ -70,9 +70,9 @@ socket.on('webrtc-connection', function(data) {
 
     // var the "negotiationneeded" event trigger offer generation.
     pc.onnegotiationneeded = function(evt) {
-        trace("pc.onnegotiationneeded ", evt);
+        trace(`pc.onnegotiationneeded ${evt}`);
         pc.createOffer().then(function(offer) {
-                trace("createOffer" + JSON.stringify(offer));
+                trace(`createOffer ${JSON.stringify(offer)}`);
                 socket.emit('webrtc-dsp', JSON.stringify({
                     "uid": userId,
                     "ruid": peerId,
@@ -83,10 +83,9 @@ socket.on('webrtc-connection', function(data) {
             })
             .catch(logError);
     };
-    console.log("creating data channel...");
     // create a data channel
     var channel = pc.createDataChannel("channel" + peerId);
-    console.log("data channel created.");
+    trace(`data channel created with peer ${peerId}`);
 
     // keep track of channel and connection
     peers[peerId] = {
@@ -101,7 +100,7 @@ socket.on('webrtc-connection', function(data) {
  * Initial web socket connection.
  */
 socket.on('iconnect', function() {
-	console.log("websocket connected.");
+	trace("websocket connected.");
 });
 
 /*
@@ -136,11 +135,11 @@ socket.on('webrtc-message', function(data) {
 			// remote peer sends new ICE candidate. This get added locally to the peer description.
             var candidate = new RTCIceCandidate(message.candidate);
             pc.addIceCandidate(candidate).catch(logError);
-            trace("receiveed candidate: " + JSON.stringify(candidate));
+            trace(`receiveed candidate: ${JSON.stringify(candidate)}`);
         }
         // if we get an offer, we need to reply with an answer
         if (message.type == "offer") {
-            trace("received offer: " + JSON.stringify(message));
+            trace(`received offer: ${JSON.stringify(message)}`);
             var descOffer = new RTCSessionDescription(message);
             pc.setRemoteDescription(descOffer).then(function() {
                     return pc.createAnswer();
@@ -151,13 +150,13 @@ socket.on('webrtc-message', function(data) {
                         "ruid": ruid,
                         "webrtc": answer
                     }));
-                    trace("sending answer: " + JSON.stringify(answer));
+                    trace(`sending answer: ${JSON.stringify(answer)}`);
                     return pc.setLocalDescription(answer);
                 })
                 .then(function() {
                     pc.onicecandidate = function(evt) {
                         if (evt.candidate) {
-                            trace("pc.onicecandidate: " + JSON.stringify(evt.candidate));
+                            trace(`pc.onicecandidate: ${JSON.stringify(evt.candidate)}`);
                             var candidate = new RTCIceCandidate(evt.candidate);
                             pc.addIceCandidate(candidate);
                             socket.emit("webrtc-candidate", JSON.stringify({
@@ -193,8 +192,8 @@ function handleChannelServer(channel, peerId) {
 
 	// peer to peer message types: file-list and file-request.
     channel.onmessage = function(evt) {
-        trace("receiving msg");
         var msg = JSON.parse(evt.data);
+        trace(`channel message: ${JSON.stringify(msg)}`);
         switch (msg.type) {
             case "file-list":
                 var fileList = {};
@@ -256,7 +255,7 @@ function handleChannelClient(channel, ruid) {
     var file = null;
 
     channel.onopen = function() {
-        trace("channel open");
+        trace(`channel open with peer: ${ruid}`);
 		//var cb = callbacks[remote_peer_id];
 		var cb = callbacks[ruid];
 		if (cb) {
@@ -295,7 +294,7 @@ function handleChannelClient(channel, ruid) {
 				// download next in queue
 				var next = queue.pop();
 				if (next) {
-					console.log("next: " + next.t.id);
+					trace(`next: ${next.t.id}`);
 					requestFile(next.t, next.id);
 				}
 				
@@ -308,7 +307,7 @@ function handleChannelClient(channel, ruid) {
                     break;
                 case "file-rep":
                     file = msg.data;
-                    console.log(JSON.stringify(file));
+                    trace(JSON.stringify(file));
                     break;
 
 
@@ -331,7 +330,7 @@ function requestFile(t, peerId) {
 	if (receiveFile) {
         var progressText = "#PROG" + t.id.hashCode() + "TEXT";
 		queue.push({t: t, id: peerId});
-		trace("queued " + t.id);
+		trace(`queued file  ${t.id}`);
         $(progressText).attr('data-label', "Queued")
 		return;
 	}
@@ -339,7 +338,6 @@ function requestFile(t, peerId) {
     var fileName = t.id;
 	progress[t.id] = true;
 	receiveFile = true;
-    console.log("peer" + peerId);
     var channel = peers[peerId]["channel"];
 
     channel.send(JSON.stringify({
@@ -354,7 +352,7 @@ function requestFile(t, peerId) {
  */
 function sendData(fileName, channel) {
     var file = fileHash[fileName];
-    trace('File is ' + [file.name, file.size, file.type, file.lastModifiedDate].join(' '));
+    trace(`file is ${[file.name, file.size, file.type, file.lastModifiedDate].join(' ')}`);
     channel.send(JSON.stringify({
         "uid": userId,
         "type": "file-rep",
@@ -392,14 +390,14 @@ function sendData(fileName, channel) {
  * Error logging wrapper
  */
 function logError(error) {
-    trace(error.name + ": " + error.message);
+
+    trace(`ERROR in ${logError.caller()}: ${error.name} : ${error.message}.`);
     weblog(error.message, "error");
 }
 
 /*
  * Add files
  */
-
 events.on('addedFiles', function(files) {
 	files.forEach(function(f) {
 		fileHash[escape(f.name)] = f;

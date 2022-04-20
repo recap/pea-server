@@ -69,7 +69,7 @@ html, body{
 	<input id="id" type="hidden" class="w3-input"></input>
 	<div class="w3-bar">
   		<div class="w3-bar-item w3-button w3-white file-upload">
-			<i class="fa fa-upload" style="font-size:36px"></i>
+			<i id="filesIcon" class="fa fa-upload" style="font-size:36px"></i>
 			<input  id="files" multiple='true' type="file" class="upload" />
 		</div>
 			
@@ -135,11 +135,6 @@ html, body{
 	// end events
 
 	$( document ).ready(function() {
-		function handleFileSelect(evt) {
-			var files = Array.from(evt.target.files); // FileList object
-			events.emit('addedFiles', files);
-			$('#start').attr('disabled', false);
-		}
 
 		document.getElementById('btn_log').addEventListener('click', function(){$('#log').toggle(); $('#qrcode').toggle();}, false);
 		document.getElementById('copy').addEventListener('click', function(){
@@ -147,7 +142,16 @@ html, body{
 				document.execCommand('Copy', false, null);
 		}, false);
 
-		document.getElementById('files').addEventListener('change', handleFileSelect, false);
+
+		document.getElementById('files').addEventListener('change', function(evt){
+			var files = Array.from(evt.target.files); // FileList object
+			events.emit('addedFiles', files);
+			$('#start').attr('disabled', false);
+		}, false);
+		
+		document.getElementById('filesIcon').addEventListener('click', function() {
+			document.getElementById('files').click();
+		}, false);
 		
 		$('#whatsapp').attr('href', "whatsapp://send?text=" + serverUrl + '/' + userId);
 		$('#email').attr('href', "mailto:?subject=Dataplane%20share%20files&body=" + serverUrl + '/' + userId);
