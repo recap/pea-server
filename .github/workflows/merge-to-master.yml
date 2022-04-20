@@ -1,21 +1,18 @@
-name: Docker Image CI
+name: Master pull request
 
 on:
   push:
-    branches: [ dev ]
+      branches: [dev]
+  pull_request:
+      types: [ opened ]
 
 jobs:
     eslint:
         runs-on: ubuntu-latest
         steps:
-          - uses: actions/checkout@v3
-          - uses: actions/setup-node@v3
-            with:
-              node-version: 16
-          - run: npm install
-          - uses: sibiraj-s/action-eslint@v2
-            with:
-              eslint-args: '--ignore-path=node_modules --ignore-pattern=*3rdparty* --quiet'
-              extensions: 'js,jsx,ts,tsx'
-              annotations: true
+          - uses: actions/checkout@v2
+            name: Check out code
+
+          - name: Check if Debug flag is on
+            run: grep 'isDebug = false' public/js/common.js
 
