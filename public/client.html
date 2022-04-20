@@ -42,8 +42,56 @@ ul {
 <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 <script src="/js/common.js"></script>
-<script src="/js/main.js"></script>
+<script src="/js/eventemitter.js"></script>
 <script>
+	
+	var events = new EventEmitter();
+	var userId = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 7);
+
+	events.on('fileDownloadProgress', function(fileIdHash, receivedSize, fileSize) {
+		var progressText = "#PROG" + fileIdHash + "TEXT";
+		var progressId = "#PROG" + fileIdHash + "PROG";
+		var p = Math.floor((receivedSize / fileSize) * 100);
+		var ratioStr = getSizeUnits(receivedSize).size + "" + getSizeUnits(receivedSize).units + " / " + getSizeUnits(fileSize).size + "" + getSizeUnits(fileSize).units
+		trace("file download: " + p + "%");
+		$(progressText).attr('data-label', ratioStr)
+		$(progressId).css('width', p + "%")
+		trace(`received size: ${receivedSize}.`);
+	})
+
+	events.on('fileDownload', function(fileIdHash, fileName, href){
+		var progressText = "#PROG" + fileIdHash + "TEXT";
+		var progressId = "#PROG" + fileIdHash + "PROG";
+		var id = "#" + fileIdHash;
+		$(id).text("save");
+		$(id).attr('href', href);
+		$(id).attr('download', fileName);
+		var idView = "#" + fileIdHash + "VW";
+		$(idView).text("view");
+		$(idView).attr('href', href);
+	})
+
+	events.on('fileListReceived', function(uid, files) {
+		var fileNames = Object.keys(files);
+
+		var htmlStr = "<ul>";
+		fileNames.forEach(function(name) {
+			var fileSize = files[name].size;
+			var hashCode = encodeURIComponent(decodeURIComponent(name)).hashCode();
+			if(fileSize === 0) {
+				return;
+			}
+			trace(`adding file: ${name}, hash: ${hashCode}.`)
+			htmlStr += "<li><a id=" + name + " class='file-item' href=# onclick='requestFile(this,\"" + uid + "\")'>" + decodeURIComponent(name) + 
+				"</a><div class='progress' data-label='"+ getSizeUnits(fileSize).size +" " + getSizeUnits(fileSize).units +"' id=PROG" + hashCode + "TEXT> <span class=value id=PROG" + hashCode + "PROG style='width:0%;'></span> </div>" +
+				"<a class='file-item' target='_blank' href=# id=" + hashCode + "></a>" +
+				"<a class='file-item' target='_blank' href=# id=" + hashCode + "VW></a></li>";
+
+		});
+		htmlStr += "</ul>";
+		$("#maindiv").html(htmlStr);
+	})
+
     function GetURLParameter(sParam)
 	{
 		var sPageURL = window.location.search.substring(1);
@@ -61,7 +109,7 @@ ul {
 	var client = true;
 	var remote_peer_id = GetURLParameter('sessionId');
 	$( document ).ready(function() {
-		connect(remote_peer_id, function() {
+		connect(userId, remote_peer_id, function() {
 			if ( (!isFirefox) && (!isChrome) && (!isOpera) ) {
 				$('#warning').html("<h3>warning: browser might not be supported!</h3>");
 				$('#warning').css('background-color', 'red');
@@ -74,6 +122,7 @@ ul {
 		});
 	});	
 </script>
+<script src="/js/main.js"></script>
 
 <body>
 	<div id="warning"></div>

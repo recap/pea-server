@@ -49,25 +49,27 @@ html, body{
 }
 </style>
 
+
 <script src="/3rdparty/jquery-1.7.1.min.js"></script>
 <script src="/3rdparty/jquery.qrcode.min.js"></script>
 <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
 <script src="/socket.io/socket.io.js"></script>
+
 <script src="/js/common.js"></script>
+<script src="/js/eventemitter.js"></script>
+<script>
+	var events = new EventEmitter();
+	var userId = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 7);
+	var serverUrl = "http://" + location.host;
+</script>
 <script src="/js/main.js"></script>
 <body>
-
-<!--<div class="w3-container w3-black">
-	<p class="w3-large">WebRTC FTP</p>
-</div>-->
-
-
 
 <div class="w3-container w3-center">
 	<input id="id" type="hidden" class="w3-input"></input>
 	<div class="w3-bar">
   		<div class="w3-bar-item w3-button w3-white file-upload">
-			<i class="fa fa-upload" style="font-size:36px"></i>
+			<i id="filesIcon" class="fa fa-upload" style="font-size:36px"></i>
 			<input  id="files" multiple='true' type="file" class="upload" />
 		</div>
 			
@@ -117,32 +119,45 @@ html, body{
 
 </body>
 <script>
-	jQuery.fn.selectText = function(){
-	   var doc = document;
-	   var element = this[0];
-	   if (doc.body.createTextRange) {
-		   var range = document.body.createTextRange();
-		   range.moveToElementText(element);
-		   range.select();
-	   } else if (window.getSelection) {
-		   var selection = window.getSelection();        
-		   var range = document.createRange();
-		   range.selectNodeContents(element);
-		   selection.removeAllRanges();
-		   selection.addRange(range);
-	   }
-	};	
-        $( document ).ready(function() {
+	// register for events needing UI updates
+	events.on('init', function(uid, serverUrl) {
+	  $('#id').val(uid);
+	  $('#start').attr('disabled', true);
+	  $('#log').toggle();
+	  $("#url").html("<p>" + serverUrl + '/' +userId + "</p>");
+	  $('#id').attr('disabled', true);
+	  $('#start').attr('disabled', true);
+	  $('#qrcode').qrcode(serverUrl + '/' + userId);
+	  
+	  weblog("started file server at " + serverUrl + "/" + userId);
+	})
+
+	// end events
+
+	$( document ).ready(function() {
+
 		document.getElementById('btn_log').addEventListener('click', function(){$('#log').toggle(); $('#qrcode').toggle();}, false);
 		document.getElementById('copy').addEventListener('click', function(){
 				$('#url').selectText();
 				document.execCommand('Copy', false, null);
 		}, false);
 
-		document.getElementById('files').addEventListener('change', handleFileSelect, false);
-		init();
+
+		document.getElementById('files').addEventListener('change', function(evt){
+			var files = Array.from(evt.target.files); // FileList object
+			events.emit('addedFiles', files);
+			$('#start').attr('disabled', false);
+		}, false);
+		
+		document.getElementById('filesIcon').addEventListener('click', function() {
+			document.getElementById('files').click();
+		}, false);
+		
 		$('#whatsapp').attr('href', "whatsapp://send?text=" + serverUrl + '/' + userId);
 		$('#email').attr('href', "mailto:?subject=Dataplane%20share%20files&body=" + serverUrl + '/' + userId);
+		
+		// start everything		
+		events.emit('init', userId, serverUrl);
 	});
 	
 </script>

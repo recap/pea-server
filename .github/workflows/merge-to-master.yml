@@ -1,0 +1,16 @@
+name: Master pull request
+
+on:
+  pull_request:
+      types: [ opened ]
+
+jobs:
+    eslint:
+        runs-on: ubuntu-latest
+        steps:
+          - uses: actions/checkout@v2
+            name: Check out code
+
+          - name: Check if Debug flag is on
+            run: grep 'isDebug = false' public/js/common.js
+
