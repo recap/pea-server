@@ -9,7 +9,7 @@ const websocket = require('socket.io');
 const socks = {};
 const timers = {};
 // 1 hr cache time;
-const maxCacheTime = 3700000; 
+const maxCacheTime = 3600000; 
 
 module.exports.startWebSocket = function(server) {
 	const io = websocket(server);
