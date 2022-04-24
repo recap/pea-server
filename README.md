@@ -22,9 +22,14 @@ In this setup 2 browsers wanting to set up a connection will use the pea-server 
 ## Try it out
 A Docker pre built image is available on Dockerhub. To run locally:
 ```
-docker run -d recap/pea-server
+docker run -d -p 8080:80 recap/pea-server
 ```
-Point browser to container IP.
+Make sure port 8080 is open locally. 
+Point a browser to your server IP on port 8080.
+Click on the upload icon to add files to your browser server.
+Open a second browser by scanning the QR-code. 
+If everything goes right you should see the list of files.
+If the loading icon keeps looping then a peer to peer connection could not be setup most probably because of NAT setups.
  
 ## Install
 ### local
