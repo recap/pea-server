@@ -1,16 +1,25 @@
 /*global weblog, trace, io, userId, events*/
 'use strict';
 
+/* globals */
 var configuration = {
     iceServers: [{
-        urls: ["stun:stun.l.google.com:19302"]
+        urls: [
+			"stun:stun.l.google.com:19302",
+			"stun:stun1.l.google.com:19302",
+			"stun:stun2.l.google.com:19302",
+			"stun:stun3.l.google.com:19302",
+			"stun:stun4.l.google.com:19302",
+			]
     }]
 };
-
 var fileHash = {};
 var socket = io.connect();
 var peers = {};
 var callbacks = {}
+var progress = {};
+var receiveFile = false;
+var queue = [];
 
 /*
  * Register new user id on signal server.
@@ -309,9 +318,6 @@ function handleChannelClient(channel, ruid) {
 /*
  * Request a file from peer.
  */
-var progress = {};
-var receiveFile = false;
-var queue = [];
 function requestFile(t, peerId) {
 	if (progress[t.id]) return;
 
