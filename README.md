@@ -5,6 +5,7 @@ Public randezvous server at [dataplane.io](https://dataplane.io).
 ## How does it work?
 The technique employed here is Interactive Connectivity Establishment (ICE). ICE is a method that uses STUN (Session Traversal Utilities for NAT), TURN (Traversal Using Relay around NAT) and a signalling server to setup a connection between two endpoints. In turn, this method relies on a technique known as [UDP hole punching](https://en.wikipedia.org/wiki/UDP_hole_punching). Pea-server is a signalling server, while we use publicly available STUN servers provided by Google. TURN is disabled so that we only esteblish peer to peer connections or nothing at all.  
 
+In this setup 2 browsers wanting to set up a connection will use the pea-server to exchange ICE candidates (IP and port). The browsers will attempt to open a channel using different combinations of candidates. Once a channel is established, we use it as an FTP channel by exchanging files lists and file data. 
 
 ## Pros:
 - Easy for users to start using (only 3 clicks to start serving a file).
