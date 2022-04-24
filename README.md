@@ -1,6 +1,10 @@
 # pea-server
-Share files directly from your computer/smartphone to other devices directly with saving files to the cloud. 
+Peer to peer file sharing through web browsers. Share files directly from your computer/smartphone to other devices directly with saving files to the cloud. 
 Public randezvous server at [dataplane.io](https://dataplane.io).
+
+## How does it work?
+The technique employed here is Interactive Connectivity Establishment (ICE). ICE is a method that uses STUN (Session Traversal Utilities for NAT), TURN (Traversal Using Relay around NAT) and a signalling server to setup a connection between two endpoints. In turn, this method relies on a technique known as [UDP hole punching](https://en.wikipedia.org/wiki/UDP_hole_punching). Pea-server is a signalling server, while we use publicly available STUN servers provided by Google. TURN is disabled so that we only esteblish peer to peer connections or nothing at all.  
+
 
 ## Pros:
 - Easy for users to start using (only 3 clicks to start serving a file).
@@ -9,16 +13,18 @@ Public randezvous server at [dataplane.io](https://dataplane.io).
 - Direct file transfers i.e. no cloud services involved in handling data.
 
 ## Cons:
+- Connectivity depends on the local/remote network firewalls ability to let UDP holes.
 - Browser has to remain open while transfers are taking place.
 - Not yet suitable for large files.
 - Not suitable for permanent file server.
 
-## How it works
-Pea-server uses webRTC technology which is available in modern browsers such as chrome and firefox.
-WebRTC (Real Time Communication) allows data to be transferred directly between browsers. A randezvous
-server is used for signaling i.e. help both browsers setup their direct channel. 
-
-
+## Try it out
+A Docker pre built image is available on Dockerhub. To run locally:
+```
+docker run -d recap/pea-server
+```
+Point browser to container IP.
+ 
 ## Install
 ### local
 ```shell
