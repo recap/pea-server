@@ -1,6 +1,6 @@
 # pea-server
 Peer to peer file sharing through web browsers. Share files directly from your computer/smartphone to other devices directly without saving files to the cloud. 
-Public randezvous server at [dataplane.io](https://dataplane.io).
+
 
 ## How does it work?
 The technique employed here is Interactive Connectivity Establishment (ICE). ICE is a method that uses STUN (Session Traversal Utilities for NAT), TURN (Traversal Using Relay around NAT) and a signalling server to setup a connection between two endpoints. In turn, this method relies on a technique known as [UDP hole punching](https://en.wikipedia.org/wiki/UDP_hole_punching) which uses UDP to work around NATs. The success of hole punching depends on the NAT implementation. Typically, endpoint-independent mapping would allow this while an address/port dependent mapping (a.k.a symmetric NAT) would not allow UDP hole punching. Pea-server is a signalling server, while we use publicly available STUN servers provided by Google. TURN is disabled so that we only esteblish peer to peer connections or nothing at all.  
